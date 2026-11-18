@@ -3,1459 +3,985 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>GBoS GEOAI | SDG 11.3.1 Land-Use Efficiency</title>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
 <style>
-:root {
-  --navy:#10243a;
-  --blue:#1769aa;
-  --blue2:#e8f2fb;
-  --green:#16845b;
-  --orange:#d97706;
-  --red:#c0392b;
-  --bg:#edf2f7;
-  --panel:#ffffff;
-  --border:#dce4ed;
-  --muted:#65758b;
-  --text:#18283b;
-}
+:root{--navy:#10243a;--blue:#1769aa;--green:#16845b;--bg:#edf2f7;--border:#dce4ed;--muted:#65758b}
 *{box-sizing:border-box}
-html,body{margin:0;width:100%;height:100%;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text)}
+html,body{margin:0;width:100%;height:100%;font-family:Arial,sans-serif;background:var(--bg);color:#18283b}
 body{overflow:hidden}
-header{
-  height:76px;background:var(--navy);color:#fff;
-  display:flex;align-items:center;justify-content:space-between;
-  padding:10px 22px;gap:20px
-}
-.brand h1{font-size:19px;margin:0 0 5px;font-weight:700;letter-spacing:.2px}
-.brand p{font-size:11px;margin:0;color:#c9d8e7}
-.header-right{text-align:right;font-size:11px;line-height:1.6;color:#d5e1ed}
-.status{display:inline-block;padding:4px 9px;border-radius:20px;background:#25445f;color:#dcecff}
-main{
-  height:calc(100vh - 76px);
-  display:grid;grid-template-columns:minmax(260px,1fr) minmax(380px,1fr) minmax(260px,1fr);
-  gap:10px;padding:10px;min-height:0
-}
-.panel{
-  background:var(--panel);border:1px solid var(--border);border-radius:9px;
-  min-width:0;min-height:0;overflow-y:auto;padding:14px;
-  box-shadow:0 1px 4px rgba(16,36,58,.05)
-}
+header{height:76px;background:var(--navy);color:white;display:flex;justify-content:space-between;align-items:center;padding:12px 22px}
+header h1{font-size:19px;margin:0 0 5px}
+header p{font-size:11px;color:#c9d8e7;margin:0}
+.header-right{text-align:right;font-size:11px;line-height:1.7;color:#d5e1ed}
+.status{background:#25445f;padding:5px 10px;border-radius:20px}
+main{height:calc(100vh - 76px);display:grid;grid-template-columns:minmax(260px,1fr) minmax(380px,1fr) minmax(260px,1fr);gap:10px;padding:10px;min-height:0}
+.panel{background:white;border:1px solid var(--border);border-radius:9px;min-width:0;min-height:0;overflow-y:auto;padding:14px;box-shadow:0 1px 4px #10243a0c}
 .panel h2{font-size:15px;margin:0 0 12px;color:var(--navy)}
 .section{border-bottom:1px solid var(--border);padding-bottom:13px;margin-bottom:13px}
-.section:last-child{border-bottom:0}
-.section-title{
-  font-size:11px;text-transform:uppercase;letter-spacing:.7px;
-  color:var(--muted);font-weight:700;margin-bottom:9px
-}
-label{display:block;font-size:11px;font-weight:700;margin:9px 0 5px;color:#35475b}
-select,input,button{
-  width:100%;min-height:34px;border:1px solid #ccd6e1;border-radius:5px;
-  padding:7px 9px;font-size:12px;background:#fff;color:var(--text)
-}
-button{cursor:pointer;font-weight:700}
+.section-title{font-size:11px;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);font-weight:bold;margin-bottom:9px}
+label{display:block;font-size:11px;font-weight:bold;margin:9px 0 5px}
+select,input,button{width:100%;min-height:34px;border:1px solid #ccd6e1;border-radius:5px;padding:7px 9px;font-size:12px;background:white;color:#18283b}
+button{cursor:pointer;font-weight:bold}
 button.primary{background:var(--blue);color:white;border-color:var(--blue)}
 button.secondary{background:#f1f5f9}
-button:disabled{opacity:.55;cursor:not-allowed}
-.button-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:11px}
+button:disabled{opacity:.5;cursor:not-allowed}
+.button-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
 .small-note{font-size:10px;line-height:1.5;color:var(--muted);margin-top:7px}
-.warning{background:#fff7e8;border:1px solid #f2d49a;padding:9px;border-radius:5px;color:#80520b;font-size:11px;line-height:1.5}
-.info{background:#eef6ff;border:1px solid #c9def5;padding:9px;border-radius:5px;color:#244e78;font-size:11px;line-height:1.5}
-.error{background:#fff0ef;border:1px solid #efc1bd;padding:9px;border-radius:5px;color:#8d2821;font-size:11px;line-height:1.5}
-.success{background:#edf9f3;border:1px solid #b8e3cb;padding:9px;border-radius:5px;color:#176344;font-size:11px;line-height:1.5}
+.info,.warning,.error,.success{padding:9px;border-radius:5px;font-size:11px;line-height:1.5}
+.info{background:#eef6ff;border:1px solid #c9def5;color:#244e78}
+.warning{background:#fff7e8;border:1px solid #f2d49a;color:#80520b}
+.error{background:#fff0ef;border:1px solid #efc1bd;color:#8d2821}
+.success{background:#edf9f3;border:1px solid #b8e3cb;color:#176344}
 #map-panel{padding:0;display:flex;flex-direction:column;overflow:hidden}
-.map-heading{padding:12px 14px 9px;border-bottom:1px solid var(--border);flex:0 0 auto}
+.map-heading{padding:12px 14px 9px;border-bottom:1px solid var(--border)}
 .map-heading h2{margin:0 0 4px}
 .map-heading p{margin:0;font-size:10px;color:var(--muted)}
-.map-tools{padding:8px 12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;border-bottom:1px solid var(--border);flex:0 0 auto}
-.map-tools select{width:auto;min-width:120px;min-height:30px;padding:5px;font-size:11px}
-.map-tools label{display:flex;align-items:center;gap:5px;margin:0;font-size:10px}
-.map-tools input{width:auto;min-height:auto}
-#map{width:100%;flex:1 1 auto;min-height:0;background:#dce7ed}
-.map-footer{padding:7px 11px;font-size:10px;color:var(--muted);border-top:1px solid var(--border);flex:0 0 auto}
+.map-tools{padding:8px 12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;border-bottom:1px solid var(--border)}
+.map-tools select{width:auto;min-width:120px;min-height:30px}
+#map{width:100%;flex:1;min-height:0;background:#dce7ed}
+.map-footer{padding:7px 11px;font-size:10px;color:var(--muted);border-top:1px solid var(--border)}
 .kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.kpi{border:1px solid var(--border);border-radius:7px;padding:10px;background:#fbfdff;min-width:0}
+.kpi{border:1px solid var(--border);border-radius:7px;padding:10px;background:#fbfdff}
 .kpi .name{font-size:10px;color:var(--muted);line-height:1.4}
-.kpi .value{font-size:19px;font-weight:700;margin-top:5px;color:var(--navy);overflow-wrap:anywhere}
+.kpi .value{font-size:19px;font-weight:bold;margin-top:5px;color:var(--navy);overflow-wrap:anywhere}
 .kpi .unit{font-size:9px;color:var(--muted)}
 .metric-line{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px solid #edf1f5;font-size:11px}
 .metric-line span:first-child{color:var(--muted)}
 .metric-line strong{text-align:right}
 .chart-wrap{height:190px;position:relative}
 .legend-item{display:flex;align-items:center;gap:8px;font-size:10px;margin:7px 0}
-.swatch{width:13px;height:13px;border-radius:3px;border:1px solid #aab5c1;flex:0 0 auto}
+.swatch{width:13px;height:13px;border-radius:3px;border:1px solid #aab5c1}
 #log{font-size:10px;color:var(--muted);line-height:1.5;white-space:pre-wrap;max-height:110px;overflow:auto}
 footer{font-size:9px;color:var(--muted);line-height:1.6;margin-top:12px}
-.loading{display:none;position:fixed;inset:0;background:rgba(9,24,40,.55);z-index:9999;align-items:center;justify-content:center}
-.loading-card{background:#fff;padding:20px 25px;border-radius:9px;min-width:240px;text-align:center;font-size:13px;box-shadow:0 8px 30px #0003}
+.loading{display:none;position:fixed;inset:0;background:#09182888;z-index:9999;align-items:center;justify-content:center}
+.loading-card{background:white;padding:20px 25px;border-radius:9px;min-width:240px;text-align:center;font-size:13px}
 .spinner{width:25px;height:25px;border:3px solid #dbe6f0;border-top-color:var(--blue);border-radius:50%;margin:0 auto 10px;animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 .leaflet-container{font:11px Arial}
 @media(max-width:900px){
-  body{overflow:auto}
-  main{height:auto;min-height:calc(100vh - 76px);grid-template-columns:1fr;padding:8px}
-  .panel{min-height:350px}
-  #map-panel{height:600px;min-height:600px}
-  #map{min-height:400px}
-  header{height:auto;min-height:76px}
-  .header-right{display:none}
+ body{overflow:auto}
+ main{height:auto;min-height:calc(100vh - 76px);grid-template-columns:1fr}
+ .panel{min-height:350px}
+ #map-panel{height:600px;min-height:600px}
+ #map{min-height:400px}
+ .header-right{display:none}
 }
 </style>
 </head>
 
 <body>
 <header>
-  <div class="brand">
-    <h1>GBoS GEOAI | SDG 11.3.1 LAND-USE EFFICIENCY</h1>
-    <p>THE GAMBIA • LAND CONSUMPTION RATE • POPULATION GROWTH RATE • SPATIAL INTELLIGENCE</p>
-  </div>
-  <div class="header-right">
-    <div><span class="status" id="connectionStatus">Connecting to GitHub data...</span></div>
-    <div>GIS / Cartography Unit • Gambia Bureau of Statistics</div>
-  </div>
+ <div>
+  <h1>GBoS GEOAI | SDG 11.3.1 LAND-USE EFFICIENCY</h1>
+  <p>THE GAMBIA • LAND CONSUMPTION RATE • POPULATION GROWTH RATE • SPATIAL INTELLIGENCE</p>
+ </div>
+ <div class="header-right">
+  <div><span class="status" id="connectionStatus">Connecting...</span></div>
+  <div>GIS / Cartography Unit • Gambia Bureau of Statistics</div>
+ </div>
 </header>
 
 <main>
-  <!-- LEFT: CONTROLS -->
-  <aside class="panel">
-    <h2>01. Controls & Data</h2>
+<!-- CONTROLS -->
+<aside class="panel">
+<h2>01. Controls & Data</h2>
 
-    <div class="section">
-      <div class="section-title">Data connection</div>
-      <div class="info">
-        Data are loaded directly from the SDG_11 GitHub repository. No manual upload is required.
-      </div>
-      <label>Data loading status</label>
-      <div id="dataStatus" class="small-note">Waiting for repository data...</div>
-      <div class="button-row">
-        <button class="secondary" id="reloadBtn">Reload data</button>
-        <button class="secondary" id="resetBtn">Reset selection</button>
-      </div>
-    </div>
+<div class="section">
+ <div class="section-title">GitHub data connection</div>
+ <div class="info">All datasets are loaded directly from the SDG_11 GitHub repository.</div>
+ <label>Data loading status</label>
+ <div id="dataStatus" class="small-note">Initialising...</div>
+ <div class="button-row">
+  <button class="secondary" id="reloadBtn">Reload data</button>
+  <button class="secondary" id="resetBtn">Reset</button>
+ </div>
+</div>
 
-    <div class="section">
-      <div class="section-title">Administrative selection</div>
-      <label for="lgaSelect">Local Government Area</label>
-      <select id="lgaSelect"><option value="">All LGAs</option></select>
+<div class="section">
+ <div class="section-title">Administrative selection</div>
+ <label>Local Government Area</label>
+ <select id="lgaSelect"><option value="">All LGAs</option></select>
+ <label>District</label>
+ <select id="districtSelect"><option value="">All districts</option></select>
+ <label>Ward</label>
+ <select id="wardSelect"><option value="">All wards</option></select>
+ <label>Enumeration Area</label>
+ <select id="eaSelect"><option value="">All enumeration areas</option></select>
+ <div class="small-note">All statistics and exports are restricted to the selected area.</div>
+</div>
 
-      <label for="districtSelect">District</label>
-      <select id="districtSelect"><option value="">All districts</option></select>
+<div class="section">
+ <div class="section-title">LULC observation years</div>
+ <label>Start-year raster</label>
+ <select id="startLulc">
+  <option value="2003">2003</option>
+  <option value="2013">2013</option>
+  <option value="2024">2024</option>
+ </select>
+ <label>End-year raster</label>
+ <select id="endLulc">
+  <option value="2024" selected>2024</option>
+  <option value="2013">2013</option>
+  <option value="2003">2003</option>
+ </select>
+ <label>Built-up class value</label>
+ <select id="builtClass"><option value="">Choose built-up class</option></select>
+ <div class="small-note">Choose the actual built-up class code used in your LULC classification. No class value is assumed.</div>
+</div>
 
-      <label for="wardSelect">Ward</label>
-      <select id="wardSelect"><option value="">All wards</option></select>
+<div class="section">
+ <div class="section-title">Population data fields</div>
+ <label>Start-year population field</label>
+ <select id="popStartField"><option value="">Select start-year field</option></select>
+ <label>Population start year</label>
+ <input id="popStartYear" type="number" value="2013">
+ <label>End-year population field</label>
+ <select id="popEndField"><option value="">Select end-year field</option></select>
+ <label>Population end year</label>
+ <input id="popEndYear" type="number" value="2023">
+ <div id="populationWarning" class="warning" style="margin-top:9px">
+  Population fields will be populated after loading the CSV.
+ </div>
+</div>
 
-      <label for="eaSelect">Enumeration Area</label>
-      <select id="eaSelect"><option value="">All enumeration areas</option></select>
+<div class="section">
+ <div class="section-title">Map settings</div>
+ <label>Basemap</label>
+ <select id="basemapSelect">
+  <option value="street">Street map</option>
+  <option value="satellite">Satellite</option>
+  <option value="terrain">Terrain</option>
+  <option value="hybrid">Hybrid</option>
+ </select>
+ <label>Raster overlay</label>
+ <select id="mapRaster">
+  <option value="2024">LULC 2024</option>
+  <option value="2013">LULC 2013</option>
+  <option value="2003">LULC 2003</option>
+  <option value="none">No raster</option>
+ </select>
+ <label><input type="checkbox" id="showEAs" checked style="width:auto;min-height:auto"> Show EA boundaries</label>
+ <label><input type="checkbox" id="showSelected" checked style="width:auto;min-height:auto"> Highlight selected area</label>
+</div>
 
-      <div class="small-note">The analysis, map highlight and exported results are restricted to the selected administrative area.</div>
-    </div>
+<div class="section">
+ <div class="section-title">Run analysis</div>
+ <button class="primary" id="runBtn" disabled>Run SDG 11.3.1 analysis</button>
+ <div id="analysisMessage" class="small-note"></div>
+</div>
+</aside>
 
-    <div class="section">
-      <div class="section-title">Land-use / land-cover data</div>
-      <label for="startLulc">Start-year LULC raster</label>
-      <select id="startLulc">
-        <option value="2003">2003</option>
-        <option value="2013">2013</option>
-        <option value="2024">2024</option>
-      </select>
+<!-- MAP -->
+<section class="panel" id="map-panel">
+ <div class="map-heading">
+  <h2>02. Interactive Spatial Map</h2>
+  <p>Enumeration Areas • Administrative Boundaries • Land Cover</p>
+ </div>
+ <div class="map-tools">
+  <label>Map focus</label>
+  <select id="mapFocus">
+   <option value="gambia">The Gambia</option>
+   <option value="selected">Selected area</option>
+  </select>
+  <span class="small-note" id="mapCoordinateStatus">WGS 84 display</span>
+ </div>
+ <div id="map"></div>
+ <div class="map-footer">Map display: EPSG:4326 • Spatial analysis: EPSG:32628</div>
+</section>
 
-      <label for="endLulc">End-year LULC raster</label>
-      <select id="endLulc">
-        <option value="2024" selected>2024</option>
-        <option value="2013">2013</option>
-        <option value="2003">2003</option>
-      </select>
+<!-- ANALYTICS -->
+<aside class="panel">
+<h2>03. Analytics & Results</h2>
 
-      <label for="builtClass">Built-up class value</label>
-      <select id="builtClass">
-        <option value="">Choose built-up class</option>
-      </select>
-      <div class="small-note">
-        Select the actual built-up class code used in your LULC classification. The dashboard does not assume a class code.
-      </div>
-    </div>
+<div class="section">
+ <div class="section-title">Selected analysis area</div>
+ <div id="selectedAreaName" class="info">The Gambia — all available EAs</div>
+</div>
 
-    <div class="section">
-      <div class="section-title">Population data / census fields</div>
-      <label for="popStartField">Population start-year field</label>
-      <select id="popStartField">
-        <option value="">Select a 2013 population field</option>
-      </select>
+<div class="section">
+ <div class="section-title">Key performance indicators</div>
+ <div class="kpi-grid">
+  <div class="kpi"><div class="name">Start built-up area</div><div class="value" id="kpiBuiltStart">—</div><div class="unit">km²</div></div>
+  <div class="kpi"><div class="name">End built-up area</div><div class="value" id="kpiBuiltEnd">—</div><div class="unit">km²</div></div>
+  <div class="kpi"><div class="name">Land consumption rate</div><div class="value" id="kpiLCR">—</div><div class="unit">% per year</div></div>
+  <div class="kpi"><div class="name">Population growth rate</div><div class="value" id="kpiPGR">—</div><div class="unit">% per year</div></div>
+  <div class="kpi"><div class="name">SDG 11.3.1 ratio</div><div class="value" id="kpiRatio">—</div><div class="unit">LCR / PGR</div></div>
+  <div class="kpi"><div class="name">Enumeration Areas</div><div class="value" id="kpiEAs">—</div><div class="unit">Selected features</div></div>
+ </div>
+</div>
 
-      <label for="popStartYear">Population start year</label>
-      <input id="popStartYear" type="number" value="2013" min="1900" max="2100">
+<div class="section">
+ <div class="section-title">Land consumption and population</div>
+ <div class="chart-wrap"><canvas id="comparisonChart"></canvas></div>
+</div>
 
-      <label for="popEndField">Population end-year field</label>
-      <select id="popEndField">
-        <option value="">Select a 2023 population field</option>
-      </select>
+<div class="section">
+ <div class="section-title">Calculation details</div>
+ <div class="metric-line"><span>Built-up area change</span><strong id="builtChange">—</strong></div>
+ <div class="metric-line"><span>Built-up area change (%)</span><strong id="builtChangePct">—</strong></div>
+ <div class="metric-line"><span>Population at start</span><strong id="populationStart">—</strong></div>
+ <div class="metric-line"><span>Population at end</span><strong id="populationEnd">—</strong></div>
+ <div class="metric-line"><span>Population change</span><strong id="populationChange">—</strong></div>
+ <div class="metric-line"><span>LULC period</span><strong id="lulcPeriod">—</strong></div>
+ <div class="metric-line"><span>Population period</span><strong id="popPeriod">—</strong></div>
+</div>
 
-      <label for="popEndYear">Population end year</label>
-      <input id="popEndYear" type="number" value="2023" min="1900" max="2100">
+<div class="section">
+ <div class="section-title">Methodology</div>
+ <div class="small-note">
+  <b>Land Consumption Rate (LCR)</b><br>
+  LCR = [ln(Urb₂ / Urb₁) / n] × 100<br><br>
+  <b>Population Growth Rate (PGR)</b><br>
+  PGR = [ln(Pop₂ / Pop₁) / n] × 100<br><br>
+  <b>SDG Indicator 11.3.1</b><br>
+  SDG 11.3.1 = LCR / PGR<br><br>
+  Urb₁ and Urb₂ are built-up areas. Pop₁ and Pop₂ are population totals. n is the observation period in years.
+ </div>
+</div>
 
-      <div id="populationWarning" class="warning" style="margin-top:9px">
-        Population fields will be populated after the CSV is loaded. Check that the selected fields represent comparable population totals.
-      </div>
-    </div>
+<div class="section">
+ <div class="section-title">Map legend</div>
+ <div class="legend-item"><span class="swatch" style="background:#e34a33"></span> Built-up class colour</div>
+ <div class="legend-item"><span class="swatch" style="background:#2b83ba"></span> Other LULC classes</div>
+ <div class="legend-item"><span class="swatch" style="background:#f4d35e"></span> Selected EA boundary</div>
+ <div class="legend-item"><span class="swatch" style="background:#718096"></span> Other EA boundaries</div>
+</div>
 
-    <div class="section">
-      <div class="section-title">Map display</div>
-      <label for="basemapSelect">Basemap</label>
-      <select id="basemapSelect">
-        <option value="street">Street map</option>
-        <option value="satellite">Satellite</option>
-        <option value="terrain">Terrain</option>
-        <option value="hybrid">Hybrid</option>
-      </select>
+<div class="section">
+ <div class="section-title">Export results</div>
+ <div class="button-row">
+  <button class="secondary" id="exportCSV">Export analysis CSV</button>
+  <button class="secondary" id="exportGeoJSON">Export selected EAs</button>
+ </div>
+</div>
 
-      <label for="mapRaster">Raster displayed on map</label>
-      <select id="mapRaster">
-        <option value="2024">LULC 2024</option>
-        <option value="2013">LULC 2013</option>
-        <option value="2003">LULC 2003</option>
-        <option value="none">No raster overlay</option>
-      </select>
-      <label><input type="checkbox" id="showEAs" checked style="width:auto;min-height:auto;margin-right:5px"> Show EA boundaries</label>
-      <label><input type="checkbox" id="showSelected" checked style="width:auto;min-height:auto;margin-right:5px"> Highlight selected area</label>
-    </div>
+<div class="section">
+ <div class="section-title">Processing log</div>
+ <div id="log">Dashboard initialising...</div>
+</div>
 
-    <div class="section">
-      <div class="section-title">Analysis</div>
-      <button class="primary" id="runBtn" disabled>Run SDG 11.3.1 analysis</button>
-      <div class="small-note">The analysis uses the selected EA boundaries, selected LULC years, built-up class and population fields.</div>
-      <div id="analysisMessage" class="small-note"></div>
-    </div>
-  </aside>
-
-  <!-- CENTRE: MAP -->
-  <section class="panel" id="map-panel">
-    <div class="map-heading">
-      <h2>02. Interactive Spatial Map</h2>
-      <p>Enumeration Areas • Administrative Boundaries • Built-up Land Cover</p>
-    </div>
-    <div class="map-tools">
-      <label>Map focus</label>
-      <select id="mapFocus">
-        <option value="selected">Selected area</option>
-        <option value="gambia">The Gambia</option>
-      </select>
-      <span class="small-note" id="mapCoordinateStatus">Coordinate reference: EPSG:4326 display</span>
-    </div>
-    <div id="map"></div>
-    <div class="map-footer">
-      Map display: WGS 84 (EPSG:4326) • Spatial analysis: WGS 84 / UTM Zone 28N (EPSG:32628)
-    </div>
-  </section>
-
-  <!-- RIGHT: ANALYTICS -->
-  <aside class="panel">
-    <h2>03. Analytics & Results</h2>
-
-    <div class="section">
-      <div class="section-title">Selected analysis area</div>
-      <div id="selectedAreaName" class="info">The Gambia — all available enumeration areas</div>
-    </div>
-
-    <div class="section">
-      <div class="section-title">Key performance indicators</div>
-      <div class="kpi-grid">
-        <div class="kpi">
-          <div class="name">Start-year built-up area</div>
-          <div class="value" id="kpiBuiltStart">—</div>
-          <div class="unit">km²</div>
-        </div>
-        <div class="kpi">
-          <div class="name">End-year built-up area</div>
-          <div class="value" id="kpiBuiltEnd">—</div>
-          <div class="unit">km²</div>
-        </div>
-        <div class="kpi">
-          <div class="name">Land consumption rate</div>
-          <div class="value" id="kpiLCR">—</div>
-          <div class="unit">% per year</div>
-        </div>
-        <div class="kpi">
-          <div class="name">Population growth rate</div>
-          <div class="value" id="kpiPGR">—</div>
-          <div class="unit">% per year</div>
-        </div>
-        <div class="kpi">
-          <div class="name">SDG 11.3.1 ratio</div>
-          <div class="value" id="kpiRatio">—</div>
-          <div class="unit">LCR / PGR</div>
-        </div>
-        <div class="kpi">
-          <div class="name">Enumeration Areas</div>
-          <div class="value" id="kpiEAs">—</div>
-          <div class="unit">Selected features</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="section">
-      <div class="section-title">Land consumption and population</div>
-      <div class="chart-wrap"><canvas id="comparisonChart"></canvas></div>
-    </div>
-
-    <div class="section">
-      <div class="section-title">SDG 11.3.1 calculation details</div>
-      <div class="metric-line"><span>Built-up area change</span><strong id="builtChange">—</strong></div>
-      <div class="metric-line"><span>Built-up area change (%)</span><strong id="builtChangePct">—</strong></div>
-      <div class="metric-line"><span>Population at start</span><strong id="populationStart">—</strong></div>
-      <div class="metric-line"><span>Population at end</span><strong id="populationEnd">—</strong></div>
-      <div class="metric-line"><span>Population change</span><strong id="populationChange">—</strong></div>
-      <div class="metric-line"><span>LULC observation period</span><strong id="lulcPeriod">—</strong></div>
-      <div class="metric-line"><span>Population observation period</span><strong id="popPeriod">—</strong></div>
-    </div>
-
-    <div class="section">
-      <div class="section-title">Methodology</div>
-      <div class="small-note">
-        <strong>Land Consumption Rate (LCR)</strong><br>
-        LCR = [ln(Urb₂ / Urb₁) / n] × 100<br><br>
-        <strong>Population Growth Rate (PGR)</strong><br>
-        PGR = [ln(Pop₂ / Pop₁) / n] × 100<br><br>
-        <strong>SDG Indicator 11.3.1</strong><br>
-        SDG 11.3.1 = LCR / PGR<br><br>
-        Urb₁ and Urb₂ are built-up areas in the start and end years. Pop₁ and Pop₂ are population totals for the selected population fields. n is the number of years between observations.
-      </div>
-    </div>
-
-    <div class="section">
-      <div class="section-title">Map legend</div>
-      <div class="legend-item"><span class="swatch" style="background:#e34a33"></span> Selected built-up class</div>
-      <div class="legend-item"><span class="swatch" style="background:#2b83ba"></span> Other LULC classes / raster</div>
-      <div class="legend-item"><span class="swatch" style="background:#f4d35e"></span> Selected EA boundary</div>
-      <div class="legend-item"><span class="swatch" style="background:#718096"></span> Other EA boundaries</div>
-    </div>
-
-    <div class="section">
-      <div class="section-title">Export results</div>
-      <div class="button-row">
-        <button class="secondary" id="exportCSV">Export analysis CSV</button>
-        <button class="secondary" id="exportGeoJSON">Export selected EAs</button>
-      </div>
-      <div class="small-note">Exports contain the selected administrative area only.</div>
-    </div>
-
-    <div class="section">
-      <div class="section-title">Processing log</div>
-      <div id="log">Dashboard initialising...</div>
-    </div>
-
-    <footer>
-      Produced by Ansu Singhateh | GIS Analyst | GIS / Cartography Unit | Gambia Bureau of Statistics<br>
-      GBoS GEOAI • Research and educational use
-    </footer>
-  </aside>
+<footer>
+ Produced by Ansu Singhateh | GIS Analyst | GIS / Cartography Unit | Gambia Bureau of Statistics<br>
+ GBoS GEOAI • Research and educational use
+</footer>
+</aside>
 </main>
 
 <div class="loading" id="loading">
-  <div class="loading-card">
-    <div class="spinner"></div>
-    <div id="loadingText">Loading data...</div>
-  </div>
+ <div class="loading-card">
+  <div class="spinner"></div>
+  <div id="loadingText">Loading data...</div>
+ </div>
 </div>
 
+<!-- LIBRARIES: GeoRaster is loaded using its documented browser entry point -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.9.0/proj4.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/georaster/1.6.0/georaster.browser.bundle.min.js"></script>
+<script src="https://unpkg.com/georaster@1.6.0"></script>
 <script src="https://unpkg.com/georaster-layer-for-leaflet@3.10.0/dist/georaster-layer-for-leaflet.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 
 <script>
+"use strict";
+
 /* ==========================================================
-   GBoS GEOAI — SDG 11.3.1 LAND-USE EFFICIENCY
-   Coordinate handling:
-   - Leaflet display: EPSG:4326 GeoJSON
-   - Analysis: EPSG:32628 projected GeoJSON and raster
+   GEORASTER PARSER INITIALISATION
+   Fix for: ReferenceError: parseGeoraster is not defined
    ========================================================== */
 
-const BASE_URL = "https://raw.githubusercontent.com/silkysingz94-oss/SDG_11/main/";
+function getGeoRasterParser(){
+ const candidates=[
+  window.parseGeoraster,
+  window.parse_georaster,
+  window.georaster
+ ];
+ const parser=candidates.find(item=>typeof item==="function");
+ if(!parser){
+  throw new Error(
+   "GeoRaster parser was not found. Check that https://unpkg.com/georaster@1.6.0 loaded successfully. " +
+   "Try refreshing the page or check browser network access."
+  );
+ }
+ return parser;
+}
 
-const FILES = {
-  csv: BASE_URL + "Census_2013_2023.csv",
-  geojson: BASE_URL + "Census_EAs_Geo.json",
-  popDensity: BASE_URL + "GBoS_EA_Population_Density.tif",
-  lulc2003: BASE_URL + "Gambia_LULC_2003.tif",
-  lulc2013: BASE_URL + "Gambia_LULC_2013.tif",
-  lulc2024: BASE_URL + "Gambia_LULC_2024.tif"
+const BASE="https://raw.githubusercontent.com/silkysingz94-oss/SDG_11/main/";
+
+const FILES={
+ csv:BASE+"Census_2013_2023.csv",
+ geojson:BASE+"Census_EAs_Geo.json",
+ density:BASE+"GBoS_EA_Population_Density.tif",
+ "2003":BASE+"Gambia_LULC_2003.tif",
+ "2013":BASE+"Gambia_LULC_2013.tif",
+ "2024":BASE+"Gambia_LULC_2024.tif"
 };
 
-proj4.defs(
-  "EPSG:32628",
-  "+proj=utm +zone=28 +datum=WGS84 +units=m +no_defs +type=crs"
-);
-proj4.defs("EPSG:4326", "+proj=longlat +datum=WGS84 +no_defs +type=crs");
+proj4.defs("EPSG:32628","+proj=utm +zone=28 +datum=WGS84 +units=m +no_defs +type=crs");
+proj4.defs("EPSG:4326","+proj=longlat +datum=WGS84 +no_defs +type=crs");
 
-const $ = id => document.getElementById(id);
+const $=id=>document.getElementById(id);
 
-let geoDataWGS84 = null;
-let geoDataUTM = null;
-let csvRows = [];
-let csvHeaders = [];
-let joinedRows = new Map();
-let rasters = {};
-let rasterLayers = {};
-let eaLayer = null;
-let selectedLayer = null;
-let currentRasterLayer = null;
-let comparisonChart = null;
-let lastResults = null;
-let classValues = [];
+let geoWGS=null,geoUTM=null,csvRows=[],csvHeaders=[];
+let rasters={},currentRasterLayer=null,eaLayer=null,selectedLayer=null;
+let comparisonChart=null,lastResults=null;
 
-const map = L.map("map", {
-  zoomControl:true,
-  preferCanvas:true,
-  minZoom:5,
-  maxZoom:18
-}).setView([13.45,-15.5],8);
+const map=L.map("map",{preferCanvas:true,minZoom:5,maxZoom:18}).setView([13.45,-15.5],8);
+let baseLayer=null,hybridLabels=null;
 
-let baseLayer = null;
-
-const BASEMAPS = {
-  street: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-  satellite: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-  terrain: "https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png",
-  hybrid: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+const BASEMAPS={
+ street:"https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+ satellite:"https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+ terrain:"https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png",
+ hybrid:"https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
 };
 
-function setBasemap(type) {
-  if (baseLayer) map.removeLayer(baseLayer);
-  baseLayer = L.tileLayer(BASEMAPS[type] || BASEMAPS.street, {
-    maxZoom:19,
-    attribution: type === "street" ? "&copy; OpenStreetMap contributors" :
-      type === "terrain" ? "&copy; OpenTopoMap contributors" : "Tiles &copy; Esri"
-  }).addTo(map);
+function setBasemap(type){
+ if(baseLayer)map.removeLayer(baseLayer);
+ if(hybridLabels)map.removeLayer(hybridLabels);
+ baseLayer=L.tileLayer(BASEMAPS[type]||BASEMAPS.street,{
+  maxZoom:19,
+  attribution:type==="street"?"&copy; OpenStreetMap contributors":
+  type==="terrain"?"&copy; OpenTopoMap":"Tiles &copy; Esri"
+ }).addTo(map);
 
-  if (type === "hybrid") {
-    L.tileLayer(
-      "https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}",
-      {maxZoom:19,opacity:.9}
-    ).addTo(map);
-  }
+ if(type==="hybrid"){
+  hybridLabels=L.tileLayer(
+   "https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}",
+   {maxZoom:19}
+  ).addTo(map);
+ }
 }
 setBasemap("street");
 
-function log(message) {
-  const el = $("log");
-  const stamp = new Date().toLocaleTimeString();
-  el.textContent = "[" + stamp + "] " + message + "\n" + el.textContent;
+function log(message){
+ $("log").textContent="["+new Date().toLocaleTimeString()+"] "+message+"\n"+$("log").textContent;
+}
+function loading(show,message){
+ $("loading").style.display=show?"flex":"none";
+ if(message)$("loadingText").textContent=message;
+}
+function status(message,type){
+ $("dataStatus").textContent=message;
+ $("connectionStatus").textContent=message;
+ $("connectionStatus").style.background=type==="error"?"#8f3029":type==="success"?"#176344":"#25445f";
+}
+function textNorm(v){return String(v??"").trim().toLowerCase()}
+function unique(values){
+ return [...new Set(values.map(v=>String(v??"").trim()).filter(Boolean))]
+ .sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
+}
+function getProp(props,names){
+ const keys=Object.keys(props||{});
+ for(const name of names){
+  const key=keys.find(k=>textNorm(k)===textNorm(name));
+  if(key!==undefined&&props[key]!==null&&props[key]!=="")return props[key];
+ }
+ return "";
+}
+function lga(f){return String(getProp(f.properties,["lganame","lga","lga_name","region"]))}
+function district(f){return String(getProp(f.properties,["distname","district","district_name"]))}
+function ward(f){return String(getProp(f.properties,["wardname","ward","ward_name"]))}
+function ea(f){return String(getProp(f.properties,["eaname","ea_name","enumeration_area","feacode","EA_code"]))}
+function code(f){return String(getProp(f.properties,["EA_code","feacode","RCO","Shape *","Shape","OBJECTID_1"]))}
+
+async function getJSON(url){
+ const response=await fetch(url,{cache:"no-store"});
+ if(!response.ok)throw new Error("Unable to load "+url+" (HTTP "+response.status+")");
+ return response.json();
+}
+async function getBuffer(url){
+ const response=await fetch(url,{cache:"no-store"});
+ if(!response.ok)throw new Error("Unable to load "+url+" (HTTP "+response.status+")");
+ return response.arrayBuffer();
 }
 
-function setLoading(show, message) {
-  $("loading").style.display = show ? "flex" : "none";
-  if (message) $("loadingText").textContent = message;
+function allCoords(geometry){
+ const out=[];
+ if(!geometry||!geometry.coordinates)return out;
+ function walk(c){
+  if(!Array.isArray(c))return;
+  if(typeof c[0]==="number"&&typeof c[1]==="number")out.push(c);
+  else c.forEach(walk);
+ }
+ walk(geometry.coordinates);
+ return out;
 }
 
-function setDataStatus(message, type) {
-  $("dataStatus").textContent = message;
-  const status = $("connectionStatus");
-  status.textContent = message;
-  status.style.background = type === "error" ? "#8f3029" :
-    type === "success" ? "#176344" : "#25445f";
+function detectCRS(gj){
+ const name=String(gj?.crs?.properties?.name||"").toUpperCase();
+ if(name.includes("32628"))return "EPSG:32628";
+ if(name.includes("4326")||name.includes("CRS84"))return "EPSG:4326";
+ if(name)throw new Error("Unsupported GeoJSON CRS: "+name);
+
+ const sample=[];
+ (gj.features||[]).slice(0,100).forEach(f=>allCoords(f.geometry).slice(0,10).forEach(c=>sample.push(c)));
+ if(!sample.length)throw new Error("GeoJSON has no valid coordinates.");
+
+ if(sample.every(c=>Math.abs(c[0])<=180&&Math.abs(c[1])<=90))return "EPSG:4326";
+ if(sample.every(c=>c[0]>100000&&c[0]<900000&&c[1]>=0&&c[1]<10000000))return "EPSG:32628";
+
+ throw new Error("Could not identify the GeoJSON CRS. Reproject Census_EAs_Geo.json to EPSG:4326 or EPSG:32628.");
 }
 
-function fetchJSON(url) {
-  return fetch(url, {cache:"no-store"}).then(response => {
-    if (!response.ok) throw new Error("HTTP " + response.status + " while loading " + url);
-    return response.json();
-  });
+function transformPosition(p,source,target){
+ if(source===target)return p.slice();
+ const xy=proj4(source,target,[p[0],p[1]]);
+ const result=p.slice();
+ result[0]=xy[0];result[1]=xy[1];
+ return result;
+}
+function transformCoords(coords,source,target){
+ if(!Array.isArray(coords))return coords;
+ if(typeof coords[0]==="number"&&typeof coords[1]==="number")
+  return transformPosition(coords,source,target);
+ return coords.map(c=>transformCoords(c,source,target));
+}
+function transformGeoJSON(source,from,to){
+ return {
+  type:"FeatureCollection",
+  features:(source.features||[]).map(f=>({
+   type:"Feature",
+   id:f.id,
+   properties:f.properties||{},
+   geometry:f.geometry?{
+    type:f.geometry.type,
+    coordinates:transformCoords(f.geometry.coordinates,from,to)
+   }:null
+  }))
+ };
 }
 
-async function fetchArrayBuffer(url) {
-  const response = await fetch(url, {cache:"no-store"});
-  if (!response.ok) throw new Error("HTTP " + response.status + " while loading " + url);
-  return response.arrayBuffer();
+function setOptions(id,values,firstLabel){
+ const select=$(id),old=select.value;
+ select.innerHTML="";
+ const first=document.createElement("option");
+ first.value="";first.textContent=firstLabel;select.appendChild(first);
+ values.forEach(v=>{
+  const o=document.createElement("option");o.value=v;o.textContent=v;select.appendChild(o);
+ });
+ if(values.includes(old))select.value=old;
 }
 
-function getCoordinates(geometry) {
-  if (!geometry || !geometry.coordinates) return [];
-  const output = [];
-  function walk(value) {
-    if (!Array.isArray(value)) return;
-    if (value.length >= 2 && typeof value[0] === "number" && typeof value[1] === "number") {
-      output.push(value);
-    } else {
-      value.forEach(walk);
-    }
+function selectedFeatures(){
+ if(!geoWGS)return [];
+ const a=$("lgaSelect").value,d=$("districtSelect").value,w=$("wardSelect").value,e=$("eaSelect").value;
+ return geoWGS.features.filter(f=>
+  (!a||lga(f)===a)&&(!d||district(f)===d)&&(!w||ward(f)===w)&&(!e||ea(f)===e)
+ );
+}
+function matchingUTM(features){
+ const indexMap=new Map();
+ geoWGS.features.forEach((f,i)=>indexMap.set(f,i));
+ return features.map(f=>geoUTM.features[indexMap.get(f)]).filter(Boolean);
+}
+
+function updateSelectors(changed){
+ if(!geoWGS)return;
+ if(changed==="lga"){$("districtSelect").value="";$("wardSelect").value="";$("eaSelect").value=""}
+ if(changed==="district"){$("wardSelect").value="";$("eaSelect").value=""}
+ if(changed==="ward")$("eaSelect").value="";
+
+ const all=geoWGS.features;
+ const a=$("lgaSelect").value,d=$("districtSelect").value,w=$("wardSelect").value;
+ const forDistrict=all.filter(f=>!a||lga(f)===a);
+ const forWard=forDistrict.filter(f=>!d||district(f)===d);
+ const forEA=forWard.filter(f=>!w||ward(f)===w);
+
+ setOptions("lgaSelect",unique(all.map(lga)),"All LGAs");
+ setOptions("districtSelect",unique(forDistrict.map(district)),"All districts");
+ setOptions("wardSelect",unique(forWard.map(ward)),"All wards");
+ setOptions("eaSelect",unique(forEA.map(ea)),"All enumeration areas");
+ refreshSelection();
+}
+
+function updateMap(features){
+ if(eaLayer)map.removeLayer(eaLayer);
+ if(selectedLayer)map.removeLayer(selectedLayer);
+
+ if($("showEAs").checked){
+  eaLayer=L.geoJSON(geoWGS,{
+   style:()=>({color:"#64748b",weight:.45,opacity:.7,fillOpacity:.01})
+  }).addTo(map);
+ }
+ if($("showSelected").checked&&features.length){
+  selectedLayer=L.geoJSON({type:"FeatureCollection",features},{
+   style:()=>({color:"#f4c542",weight:2,fillColor:"#f4d35e",fillOpacity:.13})
+  }).addTo(map);
+ }
+ const focus=$("mapFocus").value;
+ const layer=focus==="selected"?(selectedLayer||eaLayer):eaLayer;
+ if(layer&&layer.getBounds().isValid())map.fitBounds(layer.getBounds(),{padding:[15,15],maxZoom:13});
+}
+
+function refreshSelection(){
+ const features=selectedFeatures();
+ const area=[ $("lgaSelect").value,$("districtSelect").value,$("wardSelect").value,$("eaSelect").value ]
+ .filter(Boolean).join(" / ")||"The Gambia — all available enumeration areas";
+ $("selectedAreaName").textContent=area;
+ $("kpiEAs").textContent=features.length.toLocaleString();
+ updateMap(features);
+ return {wgs:features,utm:matchingUTM(features)};
+}
+
+/* CSV */
+async function loadCSV(){
+ const response=await fetch(FILES.csv,{cache:"no-store"});
+ if(!response.ok)throw new Error("Could not load census CSV: HTTP "+response.status);
+ const parsed=Papa.parse(await response.text(),{header:true,skipEmptyLines:true});
+ csvRows=parsed.data||[];
+ csvHeaders=parsed.meta.fields||[];
+ log("CSV loaded: "+csvRows.length+" records.");
+ const popFields=csvHeaders.filter(h=>/pop/i.test(h));
+ ["popStartField","popEndField"].forEach((id,i)=>{
+  const s=$(id);s.innerHTML="";
+  const o=document.createElement("option");o.value="";o.textContent=i===0?"Select start-year field":"Select end-year field";s.appendChild(o);
+  popFields.forEach(f=>{const x=document.createElement("option");x.value=f;x.textContent=f;s.appendChild(x)});
+ });
+ const startGuess=popFields.find(f=>/pop.*(13|2013)|(13|2013).*pop/i.test(f));
+ const endGuess=popFields.find(f=>/census_pop_23/i.test(f))||popFields.find(f=>/pop.*(23|2023)|(23|2023).*pop/i.test(f));
+ if(startGuess)$("popStartField").value=startGuess;
+ if(endGuess)$("popEndField").value=endGuess;
+ $("populationWarning").textContent=startGuess?
+ "Population fields detected. Verify that both columns contain comparable totals.":
+ "No clearly identified 2013 population field was found. The supplied field list contains Census_pop_23 but does not clearly identify Census_pop_13. Select the correct start-year field if it exists.";
+}
+
+function rowCode(row){
+ return String(row.EA_code||row.feacode||row.RCO||row["Shape *"]||row.Shape||row.OBJECTID_1||"").trim();
+}
+function getCSVRow(feature){
+ const c=code(feature);
+ return csvRows.find(r=>rowCode(r)===c)||null;
+}
+function num(v){
+ const n=Number(String(v??"").replace(/,/g,"").trim());
+ return Number.isFinite(n)?n:0;
+}
+function populationSum(features,field){
+ if(!field)return null;
+ let total=0,matched=0;
+ features.forEach(f=>{
+  const row=getCSVRow(f);
+  if(row&&row[field]!==undefined&&row[field]!==""){
+   total+=num(row[field]);matched++;
   }
-  walk(geometry.coordinates);
-  return output;
+ });
+ return {total,matched};
 }
 
-function getGeoJSONCRS(geojson) {
-  const crsName = geojson && geojson.crs &&
-    geojson.crs.properties && geojson.crs.properties.name
-    ? String(geojson.crs.properties.name).toUpperCase()
-    : "";
+/* GEORASTER PARSING — FIXED */
+async function loadRaster(url,label){
+ const parser=getGeoRasterParser();
+ const buffer=await getBuffer(url);
 
-  if (crsName) {
-    if (crsName.includes("32628")) return "EPSG:32628";
-    if (crsName.includes("4326") || crsName.includes("CRS84")) return "EPSG:4326";
-    throw new Error("GeoJSON CRS metadata is not supported: " + crsName +
-      ". Please reproject the GeoJSON to EPSG:32628 or EPSG:4326.");
+ // Call the parser explicitly obtained from the loaded GeoRaster library.
+ const raster=await parser(buffer);
+
+ if(!raster)throw new Error(label+" could not be parsed.");
+ const projection=Number(raster.projection);
+ if(projection!==32628){
+  throw new Error(label+" is EPSG:"+raster.projection+
+   ". This analysis requires EPSG:32628. Reproject the TIFF in QGIS before use.");
+ }
+ if(!raster.values||!raster.values[0])throw new Error(label+" has no raster values.");
+ if(!Number.isFinite(raster.pixelWidth)||!Number.isFinite(raster.pixelHeight))
+  throw new Error(label+" has invalid pixel dimensions.");
+
+ log(label+" loaded successfully. Projection EPSG:"+projection);
+ return raster;
+}
+
+function rasterClasses(raster){
+ const values=new Set(),band=raster.values[0];
+ const rowStep=Math.max(1,Math.floor(band.length/250));
+ for(let r=0;r<band.length;r+=rowStep){
+  const row=band[r];if(!row)continue;
+  const colStep=Math.max(1,Math.floor(row.length/250));
+  for(let c=0;c<row.length;c+=colStep){
+   const v=row[c];
+   if(Number.isFinite(v)&&v!==raster.noDataValue)values.add(String(v));
   }
-
-  const sample = [];
-  (geojson.features || []).slice(0,100).forEach(feature => {
-    getCoordinates(feature.geometry).slice(0,10).forEach(c => sample.push(c));
-  });
-
-  if (!sample.length) throw new Error("GeoJSON contains no usable coordinates.");
-
-  const geographic = sample.every(c =>
-    Math.abs(c[0]) <= 180 && Math.abs(c[1]) <= 90
-  );
-
-  if (geographic) return "EPSG:4326";
-
-  const utm28 = sample.every(c =>
-    c[0] > 100000 && c[0] < 900000 &&
-    c[1] >= 0 && c[1] < 10000000
-  );
-
-  if (utm28) return "EPSG:32628";
-
-  throw new Error(
-    "GeoJSON coordinate system could not be safely identified. " +
-    "The coordinates are neither geographic longitude/latitude nor plausible UTM coordinates. " +
-    "Reproject Census_EAs_Geo.json to EPSG:4326 or EPSG:32628."
-  );
+ }
+ return [...values].sort((a,b)=>Number(a)-Number(b));
 }
 
-function transformPosition(position, sourceCRS, targetCRS) {
-  if (sourceCRS === targetCRS) return position.slice();
-  const transformed = proj4(sourceCRS, targetCRS, [position[0],position[1]]);
-  const result = position.slice();
-  result[0] = transformed[0];
-  result[1] = transformed[1];
-  return result;
-}
+const COLORS=["#2676b8","#d9c27c","#df8f44","#a7c957","#4d908e","#e76f51","#8d99ae","#6a994e","#bc6c25","#9b5de5","#f15bb5","#00bbf9"];
+function colorFor(v){return COLORS[Math.abs(Math.round(Number(v)))%COLORS.length]}
 
-function transformCoordinates(coords, sourceCRS, targetCRS) {
-  if (!Array.isArray(coords)) return coords;
-  if (coords.length >= 2 &&
-      typeof coords[0] === "number" &&
-      typeof coords[1] === "number") {
-    return transformPosition(coords,sourceCRS,targetCRS);
+function showRaster(year){
+ if(currentRasterLayer){map.removeLayer(currentRasterLayer);currentRasterLayer=null}
+ if(year==="none"||!rasters[year])return;
+ const raster=rasters[year];
+ if(typeof GeoRasterLayer!=="function"){
+  log("GeoRasterLayer plugin not available. Raster overlay skipped.");
+  return;
+ }
+ currentRasterLayer=new GeoRasterLayer({
+  georaster:raster,
+  opacity:.72,
+  resolution:256,
+  pixelValuesToColorFn:values=>{
+   const v=values?.[0];
+   if(v==null||!Number.isFinite(v)||v===raster.noDataValue)return null;
+   return colorFor(v);
   }
-  return coords.map(c => transformCoordinates(c,sourceCRS,targetCRS));
+ }).addTo(map);
 }
 
-function transformGeoJSON(source, sourceCRS, targetCRS) {
-  return {
-    type:"FeatureCollection",
-    features:(source.features || []).map(feature => ({
-      type:"Feature",
-      id:feature.id,
-      properties:feature.properties || {},
-      geometry:feature.geometry ? {
-        type:feature.geometry.type,
-        coordinates:transformCoordinates(
-          feature.geometry.coordinates,sourceCRS,targetCRS
-        )
-      } : null
-    }))
+/* SPATIAL ANALYSIS IN UTM 28N */
+function coordsOf(geometry){
+ const out=[];
+ function walk(c){
+  if(!Array.isArray(c))return;
+  if(typeof c[0]==="number"&&typeof c[1]==="number")out.push(c);
+  else c.forEach(walk);
+ }
+ if(geometry?.coordinates)walk(geometry.coordinates);
+ return out;
+}
+function boundsOf(geometry){
+ const coords=coordsOf(geometry);
+ if(!coords.length)return null;
+ return {
+  minX:Math.min(...coords.map(c=>c[0])),
+  maxX:Math.max(...coords.map(c=>c[0])),
+  minY:Math.min(...coords.map(c=>c[1])),
+  maxY:Math.max(...coords.map(c=>c[1]))
+ };
+}
+function inRing(p,ring){
+ let inside=false;
+ for(let i=0,j=ring.length-1;i<ring.length;j=i++){
+  const xi=ring[i][0],yi=ring[i][1],xj=ring[j][0],yj=ring[j][1];
+  const hit=((yi>p[1])!==(yj>p[1]))&&
+   (p[0]<(xj-xi)*(p[1]-yi)/((yj-yi)||1e-20)+xi);
+  if(hit)inside=!inside;
+ }
+ return inside;
+}
+function inPolygon(p,rings){
+ if(!rings?.length||!inRing(p,rings[0]))return false;
+ for(let i=1;i<rings.length;i++)if(inRing(p,rings[i]))return false;
+ return true;
+}
+function inGeometry(p,g){
+ if(!g)return false;
+ if(g.type==="Polygon")return inPolygon(p,g.coordinates);
+ if(g.type==="MultiPolygon")return g.coordinates.some(poly=>inPolygon(p,poly));
+ return false;
+}
+function insideFeatures(p,features,bounds){
+ for(let i=0;i<features.length;i++){
+  const b=bounds[i];
+  if(!b||p[0]<b.minX||p[0]>b.maxX||p[1]<b.minY||p[1]>b.maxY)continue;
+  if(inGeometry(p,features[i].geometry))return true;
+ }
+ return false;
+}
+function builtArea(raster,features,builtClass){
+ const band=raster.values[0];
+ const bounds=features.map(f=>boundsOf(f.geometry)).filter(Boolean);
+ if(!bounds.length)return null;
+
+ const minX=Math.min(...bounds.map(b=>b.minX));
+ const maxX=Math.max(...bounds.map(b=>b.maxX));
+ const minY=Math.min(...bounds.map(b=>b.minY));
+ const maxY=Math.max(...bounds.map(b=>b.maxY));
+
+ const px=Math.abs(raster.pixelWidth),py=Math.abs(raster.pixelHeight);
+ const c0=Math.max(0,Math.floor((minX-raster.xmin)/px)-1);
+ const c1=Math.min(raster.width-1,Math.ceil((maxX-raster.xmin)/px)+1);
+ const r0=Math.max(0,Math.floor((raster.ymax-maxY)/py)-1);
+ const r1=Math.min(raster.height-1,Math.ceil((raster.ymax-minY)/py)+1);
+
+ let count=0,valid=0;
+ for(let r=r0;r<=r1;r++){
+  const row=band[r];if(!row)continue;
+  const y=raster.ymax-(r+.5)*py;
+  for(let c=c0;c<=c1;c++){
+   const value=row[c];
+   if(value==null||!Number.isFinite(value)||value===raster.noDataValue)continue;
+   const x=raster.xmin+(c+.5)*px;
+   if(!insideFeatures([x,y],features,bounds))continue;
+   valid++;
+   if(Number(value)===Number(builtClass))count++;
+  }
+ }
+ return {areaKm2:count*(px*py/1000000),pixels:count,validPixels:valid};
+}
+
+function rate(a,b,n){
+ if(!(a>0&&b>0&&n>0))return null;
+ return Math.log(b/a)/n*100;
+}
+function fmt(v,d=2){
+ return v==null||!Number.isFinite(v)?"—":v.toLocaleString(undefined,{minimumFractionDigits:d,maximumFractionDigits:d});
+}
+
+function updateChart(r){
+ if(comparisonChart)comparisonChart.destroy();
+ comparisonChart=new Chart($("comparisonChart"),{
+  type:"bar",
+  data:{
+   labels:["Built-up "+r.startYear,"Built-up "+r.endYear,"Population "+r.popStartYear,"Population "+r.popEndYear],
+   datasets:[{
+    data:[
+     r.builtStart?.areaKm2||0,
+     r.builtEnd?.areaKm2||0,
+     r.popStart?.total||0,
+     r.popEnd?.total||0
+    ],
+    backgroundColor:["#2b83ba","#e34a33","#16845b","#77b7a0"],
+    borderRadius:4
+   }]
+  },
+  options:{
+   responsive:true,maintainAspectRatio:false,
+   plugins:{legend:{display:false}},
+   scales:{y:{beginAtZero:true,ticks:{font:{size:9}}},x:{ticks:{font:{size:9}}}}
+  }
+ });
+}
+
+function showResults(r){
+ $("kpiBuiltStart").textContent=r.builtStart?fmt(r.builtStart.areaKm2):"—";
+ $("kpiBuiltEnd").textContent=r.builtEnd?fmt(r.builtEnd.areaKm2):"—";
+ $("kpiLCR").textContent=fmt(r.lcr,3);
+ $("kpiPGR").textContent=fmt(r.pgr,3);
+ $("kpiRatio").textContent=fmt(r.ratio,3);
+ $("kpiEAs").textContent=r.features.length.toLocaleString();
+
+ const change=r.builtStart&&r.builtEnd?r.builtEnd.areaKm2-r.builtStart.areaKm2:null;
+ const changePct=change!==null&&r.builtStart.areaKm2>0?change/r.builtStart.areaKm2*100:null;
+ $("builtChange").textContent=change===null?"—":fmt(change)+" km²";
+ $("builtChangePct").textContent=fmt(changePct)+"%";
+ $("populationStart").textContent=r.popStart?Math.round(r.popStart.total).toLocaleString():"Unavailable";
+ $("populationEnd").textContent=r.popEnd?Math.round(r.popEnd.total).toLocaleString():"Unavailable";
+ $("populationChange").textContent=r.popStart&&r.popEnd?
+  Math.round(r.popEnd.total-r.popStart.total).toLocaleString():"—";
+ $("lulcPeriod").textContent=r.startYear+"–"+r.endYear;
+ $("popPeriod").textContent=r.popStartYear+"–"+r.popEndYear;
+
+ updateChart(r);
+
+ const warnings=[];
+ if(r.lcr===null)warnings.push("LCR unavailable. Check built-up class and LULC data.");
+ if(r.pgr===null)warnings.push("PGR unavailable. Check the population fields and observation years.");
+ if(r.ratio===null)warnings.push("SDG 11.3.1 unavailable. One or both rates may be unavailable, or PGR is zero.");
+ if(r.popStart&&r.popStart.matched<r.features.length)warnings.push("Start population field matched "+r.popStart.matched+" of "+r.features.length+" selected EAs.");
+ if(r.popEnd&&r.popEnd.matched<r.features.length)warnings.push("End population field matched "+r.popEnd.matched+" of "+r.features.length+" selected EAs.");
+
+ $("analysisMessage").innerHTML=warnings.length?
+  '<div class="warning">'+warnings.join("<br>")+'</div>':
+  '<div class="success">Analysis completed. Check the observation periods before interpreting the indicator.</div>';
+}
+
+async function runAnalysis(){
+ if(!geoUTM||!geoWGS)return;
+ const selection=refreshSelection();
+ const features=selection.wgs,projected=selection.utm;
+ const builtClass=$("builtClass").value;
+ if(!features.length||!projected.length){
+  $("analysisMessage").innerHTML='<div class="warning">No selected EA features available for analysis.</div>';return;
+ }
+ if(builtClass===""){
+  $("analysisMessage").innerHTML='<div class="warning">Select the built-up class value first.</div>';return;
+ }
+
+ const startYear=$("startLulc").value,endYear=$("endLulc").value;
+ if(startYear===endYear){
+  $("analysisMessage").innerHTML='<div class="warning">Choose different LULC observation years.</div>';return;
+ }
+
+ const popStartYear=Number($("popStartYear").value);
+ const popEndYear=Number($("popEndYear").value);
+ const popStartField=$("popStartField").value;
+ const popEndField=$("popEndField").value;
+
+ loading(true,"Calculating selected-area statistics...");
+ try{
+  log("Starting analysis for "+features.length+" EA features.");
+  const builtStart=builtArea(rasters[startYear],projected,builtClass);
+  const builtEnd=builtArea(rasters[endYear],projected,builtClass);
+  const popStart=populationSum(features,popStartField);
+  const popEnd=populationSum(features,popEndField);
+
+  const lcr=builtStart&&builtEnd?
+   rate(builtStart.areaKm2,builtEnd.areaKm2,Math.abs(Number(endYear)-Number(startYear))):null;
+  const pgr=popStart&&popEnd&&popEndYear!==popStartYear?
+   rate(popStart.total,popEnd.total,Math.abs(popEndYear-popStartYear)):null;
+  const ratio=lcr!==null&&pgr!==null&&pgr!==0?lcr/pgr:null;
+
+  lastResults={
+   features,area:$("selectedAreaName").textContent,
+   startYear:Number(startYear),endYear:Number(endYear),
+   popStartYear,popEndYear,popStartField,popEndField,
+   builtClass:Number(builtClass),builtStart,builtEnd,popStart,popEnd,lcr,pgr,ratio
   };
+  showResults(lastResults);
+  log("Analysis finished. LCR: "+fmt(lcr,4)+"; PGR: "+fmt(pgr,4)+"; SDG ratio: "+fmt(ratio,4));
+ }catch(error){
+  console.error(error);
+  $("analysisMessage").innerHTML='<div class="error">'+error.message+'</div>';
+  log("ANALYSIS ERROR: "+error.message);
+ }finally{loading(false)}
 }
 
-function normalizeText(value) {
-  return String(value == null ? "" : value).trim().toLowerCase();
+function download(content,name,type){
+ const blob=new Blob([content],{type});
+ const url=URL.createObjectURL(blob);
+ const a=document.createElement("a");a.href=url;a.download=name;
+ document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
+}
+function exportCSV(){
+ if(!lastResults){alert("Run the analysis first.");return}
+ const r=lastResults;
+ const data=[{
+  selected_area:r.area,
+  enumeration_areas:r.features.length,
+  display_crs:"EPSG:4326",
+  analysis_crs:"EPSG:32628",
+  lulc_start_year:r.startYear,
+  lulc_end_year:r.endYear,
+  built_up_class:r.builtClass,
+  built_up_start_km2:r.builtStart?.areaKm2??"",
+  built_up_end_km2:r.builtEnd?.areaKm2??"",
+  land_consumption_rate_percent_per_year:r.lcr??"",
+  population_start_field:r.popStartField,
+  population_end_field:r.popEndField,
+  population_start_year:r.popStartYear,
+  population_end_year:r.popEndYear,
+  population_start:r.popStart?.total??"",
+  population_end:r.popEnd?.total??"",
+  population_growth_rate_percent_per_year:r.pgr??"",
+  sdg_11_3_1_ratio:r.ratio??""
+ }];
+ download(Papa.unparse(data),"GBoS_SDG_11_3_1_Analysis.csv","text/csv;charset=utf-8");
+}
+function exportGeoJSON(){
+ const features=selectedFeatures();
+ if(!features.length){alert("No selected EAs.");return}
+ const out={
+  type:"FeatureCollection",
+  name:"GBoS_Selected_EAs_EPSG4326",
+  crs:{type:"name",properties:{name:"urn:ogc:def:crs:OGC:1.3:CRS84"}},
+  features
+ };
+ download(JSON.stringify(out,null,2),"GBoS_Selected_EAs.geojson","application/geo+json");
 }
 
-function getProperty(properties, names) {
-  const props = properties || {};
-  const keys = Object.keys(props);
-  for (const wanted of names) {
-    const found = keys.find(k => normalizeText(k) === normalizeText(wanted));
-    if (found != null && props[found] != null && props[found] !== "") return props[found];
-  }
-  return "";
-}
+async function loadAll(){
+ loading(true,"Loading GitHub data...");
+ $("runBtn").disabled=true;
+ status("Loading data...","loading");
+ try{
+  log("Checking GeoRaster parser...");
+  const parser=getGeoRasterParser();
+  if(typeof parser!=="function")throw new Error("GeoRaster parser is unavailable.");
+  log("GeoRaster parser is ready.");
 
-function getFeatureLGA(f) {
-  return String(getProperty(f.properties,["lganame","lga","lga_name","region"]) || "");
-}
-function getFeatureDistrict(f) {
-  return String(getProperty(f.properties,["distname","district","district_name"]) || "");
-}
-function getFeatureWard(f) {
-  return String(getProperty(f.properties,["wardname","ward","ward_name"]) || "");
-}
-function getFeatureEA(f) {
-  return String(getProperty(f.properties,["eaname","ea_name","enumeration_area","feacode","EA_code"]) || "");
-}
-function getFeatureCode(f) {
-  return String(getProperty(f.properties,["EA_code","feacode","RCO","Shape *","Shape"]) || "");
-}
+  log("Loading EA GeoJSON...");
+  const raw=await getJSON(FILES.geojson);
+  if(raw.type!=="FeatureCollection"||!Array.isArray(raw.features))
+   throw new Error("Census_EAs_Geo.json is not a valid FeatureCollection.");
 
-function uniqueSorted(values) {
-  return [...new Set(values.map(v => String(v).trim()).filter(Boolean))]
-    .sort((a,b) => a.localeCompare(b,undefined,{numeric:true}));
-}
+  const sourceCRS=detectCRS(raw);
+  geoWGS=transformGeoJSON(raw,sourceCRS,"EPSG:4326");
+  geoUTM=transformGeoJSON(raw,sourceCRS,"EPSG:32628");
+  $("mapCoordinateStatus").textContent="GeoJSON source: "+sourceCRS+" • Analysis: EPSG:32628";
+  log("GeoJSON loaded: "+geoWGS.features.length+" features. Source CRS: "+sourceCRS);
 
-function populateSelect(selectId, values, allLabel) {
-  const select = $(selectId);
-  const current = select.value;
-  select.innerHTML = "";
-  const first = document.createElement("option");
-  first.value = "";
-  first.textContent = allLabel;
-  select.appendChild(first);
-  values.forEach(value => {
-    const option = document.createElement("option");
-    option.value = value;
-    option.textContent = value;
-    select.appendChild(option);
+  log("Loading census CSV...");
+  await loadCSV();
+
+  log("Loading land-cover GeoTIFFs...");
+  const results=await Promise.all([
+   loadRaster(FILES["2003"],"Gambia_LULC_2003.tif"),
+   loadRaster(FILES["2013"],"Gambia_LULC_2013.tif"),
+   loadRaster(FILES["2024"],"Gambia_LULC_2024.tif")
+  ]);
+  rasters={"2003":results[0],"2013":results[1],"2024":results[2]};
+
+  try{
+   rasters.density=await loadRaster(FILES.density,"GBoS_EA_Population_Density.tif");
+   log("Population-density raster loaded. It is not used as a substitute for census population totals.");
+  }catch(e){log("Population-density raster skipped: "+e.message)}
+
+  const classes=unique([
+   ...rasterClasses(rasters["2003"]),
+   ...rasterClasses(rasters["2013"]),
+   ...rasterClasses(rasters["2024"])
+  ]).sort((a,b)=>Number(a)-Number(b));
+
+  $("builtClass").innerHTML='<option value="">Choose built-up class</option>';
+  classes.forEach(v=>{
+   const o=document.createElement("option");o.value=v;o.textContent="Class "+v;
+   $("builtClass").appendChild(o);
   });
-  if (values.includes(current)) select.value = current;
+
+  setOptions("lgaSelect",unique(geoWGS.features.map(lga)),"All LGAs");
+  updateSelectors("initial");
+  showRaster($("mapRaster").value);
+
+  $("runBtn").disabled=false;
+  status("Connected • "+geoWGS.features.length.toLocaleString()+" EA features","success");
+  $("analysisMessage").innerHTML='<div class="info">Data loaded. Select the built-up class and population fields, then run the analysis.</div>';
+  log("All main dashboard datasets loaded successfully.");
+ }catch(error){
+  console.error(error);
+  status("Data loading error","error");
+  $("dataStatus").innerHTML='<span style="color:#b42318">'+error.message+'</span>';
+  $("analysisMessage").innerHTML='<div class="error">'+error.message+'</div>';
+  log("DATA ERROR: "+error.message);
+ }finally{loading(false)}
 }
 
-function getSelectedFeatures() {
-  if (!geoDataWGS84) return [];
-  const lga = $("lgaSelect").value;
-  const district = $("districtSelect").value;
-  const ward = $("wardSelect").value;
-  const ea = $("eaSelect").value;
-
-  return geoDataWGS84.features.filter(f => {
-    if (lga && getFeatureLGA(f) !== lga) return false;
-    if (district && getFeatureDistrict(f) !== district) return false;
-    if (ward && getFeatureWard(f) !== ward) return false;
-    if (ea && getFeatureEA(f) !== ea) return false;
-    return true;
-  });
-}
-
-function updateAdministrativeSelectors(changed) {
-  if (!geoDataWGS84) return;
-
-  const all = geoDataWGS84.features;
-  const lga = $("lgaSelect").value;
-  const district = $("districtSelect").value;
-  const ward = $("wardSelect").value;
-
-  const lgaFeatures = all;
-  const districtFeatures = all.filter(f => !lga || getFeatureLGA(f) === lga);
-  const wardFeatures = districtFeatures.filter(f => !district || getFeatureDistrict(f) === district);
-  const eaFeatures = wardFeatures.filter(f => !ward || getFeatureWard(f) === ward);
-
-  if (changed === "lga") {
-    $("districtSelect").value = "";
-    $("wardSelect").value = "";
-    $("eaSelect").value = "";
-  }
-  if (changed === "district") {
-    $("wardSelect").value = "";
-    $("eaSelect").value = "";
-  }
-  if (changed === "ward") $("eaSelect").value = "";
-
-  const selectedLGA = $("lgaSelect").value;
-  const selectedDistrict = $("districtSelect").value;
-  const selectedWard = $("wardSelect").value;
-
-  const dFeatures = all.filter(f => !selectedLGA || getFeatureLGA(f) === selectedLGA);
-  const wFeatures = dFeatures.filter(f => !selectedDistrict || getFeatureDistrict(f) === selectedDistrict);
-  const eFeatures = wFeatures.filter(f => !selectedWard || getFeatureWard(f) === selectedWard);
-
-  populateSelect("lgaSelect",uniqueSorted(lgaFeatures.map(getFeatureLGA)),"All LGAs");
-  populateSelect("districtSelect",uniqueSorted(dFeatures.map(getFeatureDistrict)),"All districts");
-  populateSelect("wardSelect",uniqueSorted(wFeatures.map(getFeatureWard)),"All wards");
-  populateSelect("eaSelect",uniqueSorted(eFeatures.map(getFeatureEA)),"All enumeration areas");
-
-  refreshSelectedArea();
-}
-
-function getMatchingUTMFeatures(wgsFeatures) {
-  if (!geoDataUTM) return [];
-  const keys = new Set(wgsFeatures.map(f => getFeatureCode(f)).filter(Boolean));
-  if (keys.size) {
-    const matches = geoDataUTM.features.filter(f => keys.has(getFeatureCode(f)));
-    if (matches.length === wgsFeatures.length) return matches;
-  }
-
-  // Preserve feature order if there is no stable unique ID in the source.
-  const selectedSet = new Set(wgsFeatures);
-  const selectedIndices = [];
-  geoDataWGS84.features.forEach((f,i) => {
-    if (selectedSet.has(f)) selectedIndices.push(i);
-  });
-  return selectedIndices.map(i => geoDataUTM.features[i]).filter(Boolean);
-}
-
-function refreshSelectedArea() {
-  const selected = getSelectedFeatures();
-  const selectedUTM = getMatchingUTMFeatures(selected);
-  const lga = $("lgaSelect").value;
-  const district = $("districtSelect").value;
-  const ward = $("wardSelect").value;
-  const ea = $("eaSelect").value;
-
-  const name = [lga,district,ward,ea].filter(Boolean).join(" / ") || "The Gambia — all available enumeration areas";
-  $("selectedAreaName").textContent = name;
-  $("kpiEAs").textContent = selected.length.toLocaleString();
-  updateMapSelection(selected);
-  return {wgs:selected,utm:selectedUTM};
-}
-
-function updateMapSelection(features) {
-  if (eaLayer) map.removeLayer(eaLayer);
-  if (selectedLayer) map.removeLayer(selectedLayer);
-
-  if ($("showEAs").checked && geoDataWGS84) {
-    eaLayer = L.geoJSON(geoDataWGS84,{
-      style:() => ({
-        color:"#64748b",weight:.45,opacity:.7,fillColor:"#94a3b8",fillOpacity:.015
-      })
-    }).addTo(map);
-  }
-
-  if ($("showSelected").checked && features.length) {
-    selectedLayer = L.geoJSON({
-      type:"FeatureCollection",features
-    },{
-      style:() => ({
-        color:"#f4c542",weight:2,opacity:1,fillColor:"#f4d35e",fillOpacity:.13
-      })
-    }).addTo(map);
-  }
-
-  if ($("mapFocus").value === "selected" && features.length) {
-    const layer = selectedLayer || eaLayer;
-    if (layer && layer.getBounds().isValid()) {
-      map.fitBounds(layer.getBounds(),{padding:[18,18],maxZoom:13});
-    }
-  } else if (geoDataWGS84 && eaLayer) {
-    const bounds = eaLayer.getBounds();
-    if (bounds.isValid()) map.fitBounds(bounds,{padding:[15,15]});
-  }
-}
-
-function parseCSV(text) {
-  const parsed = Papa.parse(text,{
-    header:true,
-    skipEmptyLines:true,
-    dynamicTyping:false
-  });
-  if (parsed.errors && parsed.errors.length) {
-    log("CSV parsing returned " + parsed.errors.length + " warning(s).");
-  }
-  csvRows = parsed.data || [];
-  csvHeaders = parsed.meta.fields || [];
-  return parsed;
-}
-
-function findPopulationFields() {
-  const fields = csvHeaders.filter(h => /pop/i.test(h));
-  const startSelect = $("popStartField");
-  const endSelect = $("popEndField");
-
-  function fill(select, placeholder) {
-    select.innerHTML = "";
-    const blank = document.createElement("option");
-    blank.value = "";
-    blank.textContent = placeholder;
-    select.appendChild(blank);
-    fields.forEach(field => {
-      const option = document.createElement("option");
-      option.value = field;
-      option.textContent = field;
-      select.appendChild(option);
-    });
-  }
-
-  fill(startSelect,"Select start-year population field");
-  fill(endSelect,"Select end-year population field");
-
-  const startGuess = fields.find(f => /pop.*(13|2013)|(13|2013).*pop/i.test(f));
-  const endGuess = fields.find(f => /census_pop_23/i.test(f)) ||
-                   fields.find(f => /pop.*(23|2023)|(23|2023).*pop/i.test(f));
-
-  if (startGuess) startSelect.value = startGuess;
-  if (endGuess) endSelect.value = endGuess;
-
-  if (!startGuess) {
-    $("populationWarning").textContent =
-      "No clearly named 2013 population field was detected. The supplied column list includes Census_pop_23 but does not clearly identify Census_pop_13. Select the correct start-year field if it exists in the CSV. Do not use a 2023 value as the 2013 population.";
-  } else {
-    $("populationWarning").textContent =
-      "Population fields detected. Verify that both selected fields represent comparable population totals for their respective years.";
-  }
-}
-
-function rowCode(row) {
-  return String(
-    row.EA_code || row.feacode || row.RCO || row["Shape *"] ||
-    row.Shape || row.OBJECTID_1 || ""
-  ).trim();
-}
-
-function buildCSVJoin() {
-  joinedRows = new Map();
-  csvRows.forEach(row => {
-    const code = rowCode(row);
-    if (code) joinedRows.set(code,row);
-  });
-  log("CSV loaded: " + csvRows.length.toLocaleString() +
-      " records; " + csvHeaders.length + " columns.");
-}
-
-function getCSVRowForFeature(feature) {
-  const code = getFeatureCode(feature);
-  if (code && joinedRows.has(code)) return joinedRows.get(code);
-
-  const props = feature.properties || {};
-  const candidates = [
-    getProperty(props,["EA_code","feacode","RCO","Shape *","Shape"]),
-    getProperty(props,["OBJECTID_1"])
-  ];
-  for (const candidate of candidates) {
-    if (candidate && joinedRows.has(String(candidate).trim())) return joinedRows.get(String(candidate).trim());
-  }
-  return null;
-}
-
-function numberValue(value) {
-  if (value == null || value === "") return 0;
-  const n = Number(String(value).replace(/,/g,"").trim());
-  return Number.isFinite(n) ? n : 0;
-}
-
-function sumPopulation(features, field) {
-  if (!field) return null;
-  let total = 0;
-  let matched = 0;
-  features.forEach(feature => {
-    const row = getCSVRowForFeature(feature);
-    if (row && row[field] != null && row[field] !== "") {
-      total += numberValue(row[field]);
-      matched++;
-    }
-  });
-  return {total,matched};
-}
-
-function getRasterProjection(raster) {
-  const p = raster && raster.projection;
-  if (typeof p === "number") return "EPSG:" + p;
-  if (typeof p === "string") {
-    const s = p.toUpperCase();
-    if (/^\d+$/.test(s)) return "EPSG:" + s;
-    if (s.includes("32628")) return "EPSG:32628";
-    if (s.includes("4326")) return "EPSG:4326";
-    return s;
-  }
-  return "";
-}
-
-function checkRasterCRS(raster, label) {
-  const projection = getRasterProjection(raster);
-  if (projection !== "EPSG:32628") {
-    throw new Error(
-      label + " has projection " + (projection || "unknown") +
-      ". This dashboard performs area calculations in EPSG:32628. " +
-      "Reproject this GeoTIFF to EPSG:32628 before using it. " +
-      "The dashboard will not silently treat a different raster CRS as UTM Zone 28N."
-    );
-  }
-
-  if (!Number.isFinite(raster.pixelWidth) || !Number.isFinite(raster.pixelHeight)) {
-    throw new Error(label + " has invalid pixel dimensions.");
-  }
-  if (!Number.isFinite(raster.xmin) || !Number.isFinite(raster.ymax)) {
-    throw new Error(label + " is missing valid raster extent metadata.");
-  }
-}
-
-async function loadRaster(url,label) {
-  const buffer = await fetchArrayBuffer(url);
-  const raster = await parseGeoraster(buffer);
-  checkRasterCRS(raster,label);
-  return raster;
-}
-
-function getRasterArray(raster) {
-  if (!raster || !raster.values || !raster.values.length) return null;
-  return raster.values[0];
-}
-
-function getRasterClassValues(raster) {
-  const band = getRasterArray(raster);
-  if (!band) return [];
-  const values = new Set();
-  const maxSamples = 100000;
-  let count = 0;
-  const rowStep = Math.max(1,Math.floor(band.length / 300));
-  for (let r=0;r<band.length;r+=rowStep) {
-    const row = band[r];
-    if (!row) continue;
-    const colStep = Math.max(1,Math.floor(row.length / 300));
-    for (let c=0;c<row.length;c+=colStep) {
-      const v = row[c];
-      if (Number.isFinite(v) && v !== raster.noDataValue) values.add(String(v));
-      count++;
-      if (count >= maxSamples) break;
-    }
-    if (count >= maxSamples) break;
-  }
-  return [...values].sort((a,b)=>Number(a)-Number(b));
-}
-
-const CLASS_COLORS = [
-  "#2676b8","#d9c27c","#df8f44","#a7c957","#4d908e",
-  "#e76f51","#8d99ae","#6a994e","#bc6c25","#9b5de5",
-  "#f15bb5","#00bbf9","#90be6d","#f9c74f","#577590"
-];
-
-function classColor(value) {
-  const n = Number(value);
-  const index = Math.abs(Math.round(n)) % CLASS_COLORS.length;
-  return CLASS_COLORS[index];
-}
-
-function addRasterLayer(year) {
-  if (currentRasterLayer) {
-    map.removeLayer(currentRasterLayer);
-    currentRasterLayer = null;
-  }
-  if (year === "none" || !rasters[year]) return;
-
-  const raster = rasters[year];
-  currentRasterLayer = new GeoRasterLayer({
-    georaster:raster,
-    opacity:.72,
-    resolution:256,
-    pixelValuesToColorFn:values => {
-      const v = values && values.length ? values[0] : null;
-      if (v == null || !Number.isFinite(v) || v === raster.noDataValue) return null;
-      return classColor(v);
-    }
-  });
-  currentRasterLayer.addTo(map);
-}
-
-function getGeometryBoundsUTM(geometry) {
-  const coords = getCoordinates(geometry);
-  if (!coords.length) return null;
-  let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;
-  coords.forEach(c=>{
-    minX=Math.min(minX,c[0]);maxX=Math.max(maxX,c[0]);
-    minY=Math.min(minY,c[1]);maxY=Math.max(maxY,c[1]);
-  });
-  return {minX,minY,maxX,maxY};
-}
-
-function pointInRing(point,ring) {
-  const x=point[0], y=point[1];
-  let inside=false;
-  for(let i=0,j=ring.length-1;i<ring.length;j=i++){
-    const xi=ring[i][0], yi=ring[i][1];
-    const xj=ring[j][0], yj=ring[j][1];
-    const intersects=((yi>y)!==(yj>y)) &&
-      (x < (xj-xi)*(y-yi)/((yj-yi)||1e-20)+xi);
-    if(intersects) inside=!inside;
-  }
-  return inside;
-}
-
-function pointInPolygonRings(point,rings) {
-  if (!rings || !rings.length || !pointInRing(point,rings[0])) return false;
-  for(let i=1;i<rings.length;i++){
-    if(pointInRing(point,rings[i])) return false;
-  }
-  return true;
-}
-
-function pointInGeometry(point,geometry) {
-  if (!geometry) return false;
-  if (geometry.type === "Polygon") {
-    return pointInPolygonRings(point,geometry.coordinates);
-  }
-  if (geometry.type === "MultiPolygon") {
-    return geometry.coordinates.some(poly=>pointInPolygonRings(point,poly));
-  }
-  return false;
-}
-
-function pointInFeatureCollection(point,features,boundsList) {
-  for(let i=0;i<features.length;i++){
-    const b=boundsList[i];
-    if(!b || point[0]<b.minX || point[0]>b.maxX || point[1]<b.minY || point[1]>b.maxY) continue;
-    if(pointInGeometry(point,features[i].geometry)) return true;
-  }
-  return false;
-}
-
-function getRasterPixelAreaKm2(raster) {
-  return Math.abs(raster.pixelWidth * raster.pixelHeight) / 1000000;
-}
-
-function rasterWindowForBounds(raster,bounds) {
-  const cols = raster.width;
-  const rows = raster.height;
-  const px = Math.abs(raster.pixelWidth);
-  const py = Math.abs(raster.pixelHeight);
-
-  let c0=Math.floor((bounds.minX-raster.xmin)/px)-1;
-  let c1=Math.ceil((bounds.maxX-raster.xmin)/px)+1;
-  let r0=Math.floor((raster.ymax-bounds.maxY)/py)-1;
-  let r1=Math.ceil((raster.ymax-bounds.minY)/py)+1;
-
-  c0=Math.max(0,Math.min(cols-1,c0));
-  c1=Math.max(0,Math.min(cols-1,c1));
-  r0=Math.max(0,Math.min(rows-1,r0));
-  r1=Math.max(0,Math.min(rows-1,r1));
-
-  return {c0,c1,r0,r1};
-}
-
-function calculateBuiltUpArea(raster,features,builtClass) {
-  if (!raster || !features.length || builtClass === "") return null;
-
-  const band = getRasterArray(raster);
-  if (!band) throw new Error("Raster data array could not be read.");
-
-  const boundsList=features.map(f=>getGeometryBoundsUTM(f.geometry));
-  const validBounds=boundsList.filter(Boolean);
-  if(!validBounds.length) return null;
-
-  const totalBounds={
-    minX:Math.min(...validBounds.map(b=>b.minX)),
-    minY:Math.min(...validBounds.map(b=>b.minY)),
-    maxX:Math.max(...validBounds.map(b=>b.maxX)),
-    maxY:Math.max(...validBounds.map(b=>b.maxY))
-  };
-
-  const win=rasterWindowForBounds(raster,totalBounds);
-  const pixelArea=getRasterPixelAreaKm2(raster);
-  const target=Number(builtClass);
-  let count=0;
-  let validCount=0;
-
-  for(let r=win.r0;r<=win.r1;r++){
-    const row=band[r];
-    if(!row) continue;
-    const y=raster.ymax-(r+.5)*Math.abs(raster.pixelHeight);
-
-    for(let c=win.c0;c<=win.c1;c++){
-      const value=row[c];
-      if(value == null || !Number.isFinite(value) || value===raster.noDataValue) continue;
-
-      const x=raster.xmin+(c+.5)*Math.abs(raster.pixelWidth);
-      const point=[x,y];
-
-      if(!pointInFeatureCollection(point,features,boundsList)) continue;
-      validCount++;
-      if(Number(value)===target) count++;
-    }
-  }
-
-  return {
-    areaKm2:count*pixelArea,
-    builtPixels:count,
-    validPixels:validCount,
-    pixelAreaKm2:pixelArea
-  };
-}
-
-function formatNumber(value,digits=2) {
-  if(value==null || !Number.isFinite(value)) return "—";
-  return value.toLocaleString(undefined,{
-    minimumFractionDigits:digits,
-    maximumFractionDigits:digits
-  });
-}
-
-function calculateRate(start,end,years) {
-  if(start==null || end==null || start<=0 || end<=0 || years<=0) return null;
-  return Math.log(end/start)/years*100;
-}
-
-function downloadBlob(content,filename,type) {
-  const blob=new Blob([content],{type});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement("a");
-  a.href=url;a.download=filename;
-  document.body.appendChild(a);a.click();a.remove();
-  URL.revokeObjectURL(url);
-}
-
-function updateChart(results) {
-  const ctx=$("comparisonChart");
-  if(comparisonChart) comparisonChart.destroy();
-
-  comparisonChart=new Chart(ctx,{
-    type:"bar",
-    data:{
-      labels:[
-        "Built-up " + results.lulcStartYear,
-        "Built-up " + results.lulcEndYear,
-        "Population " + results.popStartYear,
-        "Population " + results.popEndYear
-      ],
-      datasets:[{
-        label:"Area (km²) / population (persons)",
-        data:[
-          results.builtStart ? results.builtStart.areaKm2 : 0,
-          results.builtEnd ? results.builtEnd.areaKm2 : 0,
-          results.populationStart ? results.populationStart.total : 0,
-          results.populationEnd ? results.populationEnd.total : 0
-        ],
-        backgroundColor:["#2b83ba","#e34a33","#16845b","#77b7a0"],
-        borderRadius:4
-      }]
-    },
-    options:{
-      responsive:true,
-      maintainAspectRatio:false,
-      plugins:{
-        legend:{display:false},
-        tooltip:{callbacks:{label:item=>Number(item.raw).toLocaleString()}}
-      },
-      scales:{
-        y:{beginAtZero:true,ticks:{font:{size:9}}},
-        x:{ticks:{font:{size:9}}}
-      }
-    }
-  });
-}
-
-function displayResults(results) {
-  $("kpiBuiltStart").textContent=results.builtStart ? formatNumber(results.builtStart.areaKm2) : "—";
-  $("kpiBuiltEnd").textContent=results.builtEnd ? formatNumber(results.builtEnd.areaKm2) : "—";
-  $("kpiLCR").textContent=results.lcr==null ? "—" : formatNumber(results.lcr,3);
-  $("kpiPGR").textContent=results.pgr==null ? "—" : formatNumber(results.pgr,3);
-  $("kpiRatio").textContent=results.ratio==null ? "—" : formatNumber(results.ratio,3);
-  $("kpiEAs").textContent=results.featureCount.toLocaleString();
-
-  const builtChange=results.builtStart && results.builtEnd
-    ? results.builtEnd.areaKm2-results.builtStart.areaKm2 : null;
-  const builtPct=results.builtStart && results.builtStart.areaKm2>0 && builtChange!=null
-    ? builtChange/results.builtStart.areaKm2*100 : null;
-
-  $("builtChange").textContent=builtChange==null ? "—" : formatNumber(builtChange)+" km²";
-  $("builtChangePct").textContent=builtPct==null ? "—" : formatNumber(builtPct)+"%";
-  $("populationStart").textContent=results.populationStart
-    ? Math.round(results.populationStart.total).toLocaleString() : "Not available";
-  $("populationEnd").textContent=results.populationEnd
-    ? Math.round(results.populationEnd.total).toLocaleString() : "Not available";
-
-  const popChange=results.populationStart && results.populationEnd
-    ? results.populationEnd.total-results.populationStart.total : null;
-  $("populationChange").textContent=popChange==null ? "—" : Math.round(popChange).toLocaleString();
-  $("lulcPeriod").textContent=results.lulcStartYear+"–"+results.lulcEndYear;
-  $("popPeriod").textContent=results.popStartYear+"–"+results.popEndYear;
-
-  updateChart(results);
-
-  const warnings=[];
-  if(results.lcr==null) warnings.push("LCR unavailable: check built-up class and built-up area in both years.");
-  if(results.pgr==null) warnings.push("PGR unavailable: select valid comparable population fields for both years.");
-  if(results.ratio==null) warnings.push("SDG 11.3.1 ratio unavailable because LCR or PGR could not be calculated, or PGR is zero.");
-  if(results.populationStart && results.populationStart.matched<results.featureCount) {
-    warnings.push("Start population field matched "+results.populationStart.matched+" of "+results.featureCount+" selected features.");
-  }
-  if(results.populationEnd && results.populationEnd.matched<results.featureCount) {
-    warnings.push("End population field matched "+results.populationEnd.matched+" of "+results.featureCount+" selected features.");
-  }
-
-  $("analysisMessage").innerHTML=warnings.length
-    ? '<div class="warning">'+warnings.join("<br>")+'</div>'
-    : '<div class="success">Analysis completed. Review the observation periods and selected population fields before interpreting the indicator.</div>';
-}
-
-async function runAnalysis() {
-  if(!geoDataUTM || !geoDataWGS84) {
-    $("analysisMessage").textContent="Data are not ready.";
-    return;
-  }
-
-  const selection=refreshSelectedArea();
-  const featuresUTM=selection.utm;
-  const featuresWGS=selection.wgs;
-
-  if(!featuresUTM.length) {
-    $("analysisMessage").innerHTML='<div class="warning">No matching projected EA boundaries were found for this selection.</div>';
-    return;
-  }
-
-  const builtClass=$("builtClass").value;
-  if(builtClass==="") {
-    $("analysisMessage").innerHTML='<div class="warning">Select the built-up class value before running the analysis.</div>';
-    return;
-  }
-
-  const startYear=$("startLulc").value;
-  const endYear=$("endLulc").value;
-  const startPopYear=Number($("popStartYear").value);
-  const endPopYear=Number($("popEndYear").value);
-  const startPopField=$("popStartField").value;
-  const endPopField=$("popEndField").value;
-
-  if(startYear===endYear) {
-    $("analysisMessage").innerHTML='<div class="warning">Choose two different LULC observation years.</div>';
-    return;
-  }
-
-  setLoading(true,"Calculating selected-area statistics...");
-  try {
-    log("Starting selected-area analysis for "+featuresUTM.length+" EA feature(s).");
-
-    const builtStart=calculateBuiltUpArea(rasters[startYear],featuresUTM,builtClass);
-    const builtEnd=calculateBuiltUpArea(rasters[endYear],featuresUTM,builtClass);
-
-    const populationStart=sumPopulation(featuresWGS,startPopField);
-    const populationEnd=sumPopulation(featuresWGS,endPopField);
-
-    const lulcYears=Math.abs(Number(endYear)-Number(startYear));
-    const popYears=Math.abs(endPopYear-startPopYear);
-
-    const lcr=builtStart && builtEnd
-      ? calculateRate(builtStart.areaKm2,builtEnd.areaKm2,lulcYears) : null;
-
-    const pgr=populationStart && populationEnd && popYears>0
-      ? calculateRate(populationStart.total,populationEnd.total,popYears) : null;
-
-    const ratio=lcr!=null && pgr!=null && pgr!==0 ? lcr/pgr : null;
-
-    lastResults={
-      featureCount:featuresWGS.length,
-      features:featuresWGS,
-      builtStart,builtEnd,
-      populationStart,populationEnd,
-      lcr,pgr,ratio,
-      lulcStartYear:Number(startYear),
-      lulcEndYear:Number(endYear),
-      popStartYear:startPopYear,
-      popEndYear:endPopYear,
-      builtClass:Number(builtClass),
-      startPopField,endPopField,
-      selectedName:$("selectedAreaName").textContent
-    };
-
-    displayResults(lastResults);
-    log("Analysis complete. LCR="+(lcr==null?"not available":formatNumber(lcr,4))+
-      "; PGR="+(pgr==null?"not available":formatNumber(pgr,4))+
-      "; SDG ratio="+(ratio==null?"not available":formatNumber(ratio,4)));
-  } catch(error) {
-    console.error(error);
-    $("analysisMessage").innerHTML='<div class="error">'+error.message+'</div>';
-    log("Analysis error: "+error.message);
-  } finally {
-    setLoading(false);
-  }
-}
-
-function exportAnalysisCSV() {
-  if(!lastResults) {
-    alert("Run the analysis before exporting.");
-    return;
-  }
-
-  const r=lastResults;
-  const rows=[{
-    selected_area:r.selectedName,
-    enumeration_areas:r.featureCount,
-    analysis_crs:"EPSG:32628",
-    display_crs:"EPSG:4326",
-    lulc_start_year:r.lulcStartYear,
-    lulc_end_year:r.lulcEndYear,
-    built_up_class:r.builtClass,
-    built_up_start_km2:r.builtStart ? r.builtStart.areaKm2 : "",
-    built_up_end_km2:r.builtEnd ? r.builtEnd.areaKm2 : "",
-    land_consumption_rate_percent_per_year:r.lcr==null?"":r.lcr,
-    population_start_field:r.startPopField,
-    population_end_field:r.endPopField,
-    population_start_year:r.popStartYear,
-    population_end_year:r.popEndYear,
-    population_start:r.populationStart ? r.populationStart.total : "",
-    population_end:r.populationEnd ? r.populationEnd.total : "",
-    population_growth_rate_percent_per_year:r.pgr==null?"":r.pgr,
-    sdg_11_3_1_ratio:r.ratio==null?"":r.ratio
-  }];
-
-  const csv=Papa.unparse(rows);
-  downloadBlob(csv,"GBoS_SDG_11_3_1_Selected_Area_Analysis.csv","text/csv;charset=utf-8");
-}
-
-function exportSelectedGeoJSON() {
-  const selected=getSelectedFeatures();
-  if(!selected.length) {
-    alert("No selected EA features to export.");
-    return;
-  }
-  const output={
-    type:"FeatureCollection",
-    name:"GBoS_SDG_11_3_1_Selected_EAs_EPSG4326",
-    crs:{type:"name",properties:{name:"urn:ogc:def:crs:OGC:1.3:CRS84"}},
-    features:selected
-  };
-  downloadBlob(JSON.stringify(output,null,2),
-    "GBoS_SDG_11_3_1_Selected_EAs.geojson","application/geo+json");
-}
-
-async function loadAllData() {
-  setLoading(true,"Connecting to GitHub repository...");
-  $("runBtn").disabled=true;
-  setDataStatus("Loading repository data...","loading");
-
-  try {
-    log("Loading census EA GeoJSON...");
-    const rawGeo=await fetchJSON(FILES.geojson);
-    if(rawGeo.type!=="FeatureCollection" || !Array.isArray(rawGeo.features)) {
-      throw new Error("Census_EAs_Geo.json is not a valid GeoJSON FeatureCollection.");
-    }
-
-    const sourceCRS=getGeoJSONCRS(rawGeo);
-    log("GeoJSON source CRS identified as "+sourceCRS+".");
-
-    // Transform exactly once into each target CRS.
-    geoDataWGS84=transformGeoJSON(rawGeo,sourceCRS,"EPSG:4326");
-    geoDataUTM=transformGeoJSON(rawGeo,sourceCRS,"EPSG:32628");
-
-    if(!geoDataWGS84.features.length) throw new Error("GeoJSON has no features.");
-
-    $("mapCoordinateStatus").textContent=
-      "GeoJSON source: "+sourceCRS+" • Analysis: EPSG:32628";
-
-    log("Loaded "+geoDataWGS84.features.length.toLocaleString()+
-      " EA features. Display copy: EPSG:4326; analysis copy: EPSG:32628.");
-
-    log("Loading census CSV...");
-    const csvResponse=await fetch(FILES.csv,{cache:"no-store"});
-    if(!csvResponse.ok) throw new Error("Could not load Census_2013_2023.csv: HTTP "+csvResponse.status);
-    parseCSV(await csvResponse.text());
-    buildCSVJoin();
-    findPopulationFields();
-
-    log("Loading LULC GeoTIFFs...");
-    const [r2003,r2013,r2024]=await Promise.all([
-      loadRaster(FILES.lulc2003,"Gambia_LULC_2003.tif"),
-      loadRaster(FILES.lulc2013,"Gambia_LULC_2013.tif"),
-      loadRaster(FILES.lulc2024,"Gambia_LULC_2024.tif")
-    ]);
-
-    rasters={
-      "2003":r2003,
-      "2013":r2013,
-      "2024":r2024
-    };
-
-    log("All three LULC rasters passed the EPSG:32628 check.");
-
-    // Load the population density raster as a CRS/availability check.
-    // It is not used as a substitute for census population totals.
-    try {
-      const popRaster=await loadRaster(FILES.popDensity,"GBoS_EA_Population_Density.tif");
-      rasters.populationDensity=popRaster;
-      log("Population-density GeoTIFF loaded and checked (not used as census population totals).");
-    } catch(popError) {
-      log("Population-density raster not loaded: "+popError.message);
-    }
-
-    classValues=uniqueSorted([
-      ...getRasterClassValues(rasters["2003"]),
-      ...getRasterClassValues(rasters["2013"]),
-      ...getRasterClassValues(rasters["2024"])
-    ]);
-
-    const classSelect=$("builtClass");
-    classSelect.innerHTML='<option value="">Choose built-up class</option>';
-    classValues.forEach(value=>{
-      const option=document.createElement("option");
-      option.value=value;
-      option.textContent="Class "+value;
-      classSelect.appendChild(option);
-    });
-
-    populateSelect("lgaSelect",uniqueSorted(geoDataWGS84.features.map(getFeatureLGA)),"All LGAs");
-    updateAdministrativeSelectors("initial");
-
-    addRasterLayer($("mapRaster").value);
-    $("runBtn").disabled=false;
-    setDataStatus(
-      "Connected • "+geoDataWGS84.features.length.toLocaleString()+" EA features • 3 LULC rasters",
-      "success"
-    );
-    $("analysisMessage").innerHTML=
-      '<div class="info">Data loaded. Select an administrative area, built-up class and population fields, then run the analysis.</div>';
-
-    log("Dashboard data initialisation completed successfully.");
-  } catch(error) {
-    console.error(error);
-    setDataStatus("Data loading error","error");
-    $("dataStatus").innerHTML='<span style="color:#b42318">'+error.message+'</span>';
-    $("analysisMessage").innerHTML='<div class="error">'+error.message+'</div>';
-    log("DATA ERROR: "+error.message);
-  } finally {
-    setLoading(false);
-  }
-}
-
-/* ===================== EVENT HANDLERS ===================== */
-
-$("lgaSelect").addEventListener("change",()=>updateAdministrativeSelectors("lga"));
-$("districtSelect").addEventListener("change",()=>updateAdministrativeSelectors("district"));
-$("wardSelect").addEventListener("change",()=>updateAdministrativeSelectors("ward"));
-$("eaSelect").addEventListener("change",()=>refreshSelectedArea());
-
+/* EVENT HANDLERS */
+$("lgaSelect").addEventListener("change",()=>updateSelectors("lga"));
+$("districtSelect").addEventListener("change",()=>updateSelectors("district"));
+$("wardSelect").addEventListener("change",()=>updateSelectors("ward"));
+$("eaSelect").addEventListener("change",refreshSelection);
 $("runBtn").addEventListener("click",runAnalysis);
-$("reloadBtn").addEventListener("click",loadAllData);
+$("reloadBtn").addEventListener("click",loadAll);
+$("basemapSelect").addEventListener("change",e=>setBasemap(e.target.value));
+$("mapRaster").addEventListener("change",e=>showRaster(e.target.value));
+$("showEAs").addEventListener("change",()=>updateMap(selectedFeatures()));
+$("showSelected").addEventListener("change",()=>updateMap(selectedFeatures()));
+$("mapFocus").addEventListener("change",refreshSelection);
+$("exportCSV").addEventListener("click",exportCSV);
+$("exportGeoJSON").addEventListener("click",exportGeoJSON);
 
 $("resetBtn").addEventListener("click",()=>{
-  $("lgaSelect").value="";
-  $("districtSelect").value="";
-  $("wardSelect").value="";
-  $("eaSelect").value="";
-  $("startLulc").value="2003";
-  $("endLulc").value="2024";
-  $("mapRaster").value="2024";
-  $("mapFocus").value="gambia";
-  $("builtClass").value="";
-  $("popStartField").value="";
-  $("popEndField").value="";
-  $("popStartYear").value="2013";
-  $("popEndYear").value="2023";
-  $("basemapSelect").value="street";
-  setBasemap("street");
-  addRasterLayer("2024");
-  refreshSelectedArea();
-  lastResults=null;
-  ["kpiBuiltStart","kpiBuiltEnd","kpiLCR","kpiPGR","kpiRatio",
-   "builtChange","builtChangePct","populationStart","populationEnd",
-   "populationChange","lulcPeriod","popPeriod"].forEach(id=>$(id).textContent="—");
-  $("analysisMessage").textContent="Selections reset.";
-  log("Dashboard selections reset.");
+ ["lgaSelect","districtSelect","wardSelect","eaSelect"].forEach(id=>$(id).value="");
+ $("startLulc").value="2003";
+ $("endLulc").value="2024";
+ $("mapRaster").value="2024";
+ $("mapFocus").value="gambia";
+ $("builtClass").value="";
+ $("popStartField").value="";
+ $("popEndField").value="";
+ $("popStartYear").value="2013";
+ $("popEndYear").value="2023";
+ $("basemapSelect").value="street";
+ setBasemap("street");
+ showRaster("2024");
+ lastResults=null;
+ refreshSelection();
+ ["kpiBuiltStart","kpiBuiltEnd","kpiLCR","kpiPGR","kpiRatio","builtChange","builtChangePct","populationStart","populationEnd","populationChange","lulcPeriod","popPeriod"].forEach(id=>$(id).textContent="—");
+ $("analysisMessage").textContent="Selections reset.";
 });
-
-$("basemapSelect").addEventListener("change",e=>setBasemap(e.target.value));
-$("mapRaster").addEventListener("change",e=>addRasterLayer(e.target.value));
-
-$("showEAs").addEventListener("change",()=>updateMapSelection(getSelectedFeatures()));
-$("showSelected").addEventListener("change",()=>updateMapSelection(getSelectedFeatures()));
-
-$("mapFocus").addEventListener("change",()=>{
-  if($("mapFocus").value==="gambia" && eaLayer && eaLayer.getBounds().isValid()) {
-    map.fitBounds(eaLayer.getBounds(),{padding:[15,15]});
-  } else {
-    refreshSelectedArea();
-  }
-});
-
-$("exportCSV").addEventListener("click",exportAnalysisCSV);
-$("exportGeoJSON").addEventListener("click",exportSelectedGeoJSON);
 
 window.addEventListener("resize",()=>map.invalidateSize());
 
-/* ===================== START ===================== */
-loadAllData();
+/* START */
+loadAll();
 </script>
 </body>
 </html>
+
 
