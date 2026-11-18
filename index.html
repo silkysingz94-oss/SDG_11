@@ -1,0 +1,1096 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GBoS GEOAI | SDG 11 Land-Use Efficiency – The Gambia</title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+:root{
+ --bg:#f0f1f6;--panel:#fff;--ink:#202433;--muted:#7b8190;
+ --line:#e8e9ef;--purple:#6049e8;--purple2:#8c7cf0;
+ --green:#16866d;--orange:#d88a28;--red:#c85b52;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,Arial,sans-serif;font-size:12px}
+header{padding:18px 22px 12px;display:flex;justify-content:space-between;align-items:center;gap:15px}
+h1{font-size:22px;margin:0 0 5px;font-weight:800;letter-spacing:-.5px}
+h2{font-size:13px;margin:0 0 8px;font-weight:700}
+p{margin:0;color:var(--muted);font-size:10px;line-height:1.5}
+.header-actions{display:flex;gap:7px;flex-wrap:wrap}
+button,select,input{font:inherit}
+button,select,input[type=number]{border:1px solid var(--line);border-radius:8px;background:white;padding:8px 10px;color:#303547}
+button{cursor:pointer;font-weight:600}
+button.primary{background:var(--purple);border-color:var(--purple);color:white}
+button:hover{filter:brightness(.97)}
+.layout{display:grid;grid-template-columns:minmax(235px,.85fr) minmax(400px,1.7fr) minmax(270px,1fr);gap:11px;padding:0 22px 15px}
+.panel{background:white;border:1px solid var(--line);border-radius:14px;padding:13px;min-width:0;box-shadow:0 1px 2px #00000008}
+.left,.right{max-height:calc(100vh - 130px);overflow-y:auto}
+.section{border-bottom:1px solid #eff0f4;padding-bottom:12px;margin-bottom:12px}
+.section:last-child{border:0;margin:0}
+.field{margin:9px 0}
+.field label{display:block;color:#666d7d;font-size:10px;margin-bottom:5px}
+.field select,.field input{width:100%}
+.field input[type=file]{font-size:10px}
+.small{font-size:9px;color:var(--muted);line-height:1.55}
+.status{padding:9px;background:#f4f2ff;border-radius:8px;color:#5948bc;font-size:10px;line-height:1.5;overflow-wrap:anywhere}
+.warning{background:#fff6e8;color:#855b19;padding:10px 12px;border:1px solid #f1dfb9;border-radius:9px;margin:0 22px 12px;font-size:10px;line-height:1.5}
+.maphead{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:9px}
+#map{height:calc(100vh - 220px);min-height:490px;border-radius:10px;background:#e8edf0}
+.mapbuttons{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}
+.mapbuttons button{font-size:10px;padding:6px 8px}
+.kpis{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.kpi{border:1px solid var(--line);border-radius:10px;padding:10px;min-width:0}
+.kpi span{display:block;color:var(--muted);font-size:9px}
+.kpi strong{display:block;font-size:19px;margin-top:4px;overflow-wrap:anywhere}
+.kpi small{font-size:9px;color:var(--muted)}
+.chartbox{height:175px;margin-top:9px}
+.chartbox canvas{max-height:100%}
+table{width:100%;border-collapse:collapse;font-size:10px}
+td,th{text-align:left;padding:7px 4px;border-bottom:1px solid #eff0f4}
+th{color:var(--muted);font-weight:500}
+.badge{display:inline-block;background:#edf6f2;color:#18745f;padding:3px 6px;border-radius:20px;margin:2px;font-size:9px}
+.legend{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;font-size:9px;color:#606879}
+.swatch{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:middle}
+hr{border:0;border-top:1px solid var(--line);margin:12px 0}
+footer{padding:5px 22px 18px;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;color:var(--muted);font-size:9px}
+@media(max-width:1100px){
+ .layout{grid-template-columns:260px 1fr}
+ .right{grid-column:1/-1;max-height:none}
+ .left{max-height:none}
+ #map{height:600px}
+}
+@media(max-width:720px){
+ header{display:block;padding:14px}
+ .header-actions{margin-top:10px}
+ .warning{margin:0 14px 10px}
+ .layout{display:flex;flex-direction:column;padding:0 14px 14px}
+ .left,.right{max-height:none}
+ #map{height:500px;min-height:400px}
+ footer{padding:5px 14px 16px}
+}
+</style>
+</head>
+
+<body>
+
+<header>
+ <div>
+  <h1>SDG 11 | Land-Use Efficiency – The Gambia</h1>
+  <p>GBoS GEOAI · Sustainable Cities and Communities · SDG Indicator 11.3.1</p>
+  <p>Land consumption · Built-up expansion · Population growth · Spatial efficiency</p>
+ </div>
+ <div class="header-actions">
+  <button class="primary" id="loadRepository">Load GitHub datasets</button>
+  <button class="primary" id="runAnalysis">Run analysis</button>
+  <button id="reset">Reset</button>
+ </div>
+</header>
+
+<div class="warning">
+ <b>Important methodology:</b> SDG 11.3.1 is the ratio of land consumption rate to population growth rate. The population-density raster in this repository is not a historical population series. To calculate the indicator, enter comparable population totals for the start and end years. Confirm the built-up class code against the actual LULC legend before interpreting results.
+</div>
+
+<main class="layout">
+
+<!-- LEFT PANEL -->
+<aside class="panel left">
+
+ <div class="section">
+  <h2>01 · Data sources</h2>
+
+  <div class="field">
+   <label>2003 LULC GeoTIFF</label>
+   <input type="file" id="file2003" accept=".tif,.tiff">
+  </div>
+
+  <div class="field">
+   <label>2013 LULC GeoTIFF</label>
+   <input type="file" id="file2013" accept=".tif,.tiff">
+  </div>
+
+  <div class="field">
+   <label>2024 LULC GeoTIFF</label>
+   <input type="file" id="file2024" accept=".tif,.tiff">
+  </div>
+
+  <div class="field">
+   <label>Population-density GeoTIFF</label>
+   <input type="file" id="filePopulation" accept=".tif,.tiff">
+  </div>
+
+  <p class="small">
+   Repository: silkysingz94-oss / SDG_11. You can load the files from GitHub or upload local GeoTIFF files.
+  </p>
+
+  <div id="dataStatus" class="status" style="margin-top:9px">
+   Waiting for raster data.
+  </div>
+ </div>
+
+ <div class="section">
+  <h2>02 · Analysis settings</h2>
+
+  <div class="field">
+   <label>Map display layer</label>
+   <select id="mapLayer">
+    <option value="2024">LULC 2024</option>
+    <option value="2013">LULC 2013</option>
+    <option value="2003">LULC 2003</option>
+    <option value="population">Population density</option>
+    <option value="change">Built-up change 2003–2024</option>
+   </select>
+  </div>
+
+  <div class="field">
+   <label>Built-up class code</label>
+   <select id="builtClass">
+    <option value="1">Class 1</option>
+    <option value="2" selected>Class 2</option>
+    <option value="3">Class 3</option>
+    <option value="4">Class 4</option>
+    <option value="5">Class 5</option>
+    <option value="6">Class 6</option>
+    <option value="7">Class 7</option>
+    <option value="8">Class 8</option>
+    <option value="9">Class 9</option>
+    <option value="10">Class 10</option>
+   </select>
+  </div>
+
+  <div class="field">
+   <label>Administrative boundary GeoJSON</label>
+   <input type="file" id="boundaryFile" accept=".geojson,.json">
+  </div>
+
+  <div class="field">
+   <label>Administrative level</label>
+   <select id="adminLevel">
+    <option value="national">National</option>
+    <option value="region">Region / LGA</option>
+    <option value="district">District</option>
+    <option value="ward">Ward</option>
+   </select>
+  </div>
+
+  <div class="field">
+   <label>Selected administrative area</label>
+   <select id="selectedArea">
+    <option value="all">National – All The Gambia</option>
+   </select>
+  </div>
+
+  <p class="small">
+   Administrative calculations require a compatible GeoJSON boundary file. The dashboard does not invent regional or district population values.
+  </p>
+ </div>
+
+ <div class="section">
+  <h2>03 · Population inputs</h2>
+
+  <div class="field">
+   <label>Population at start year (2003)</label>
+   <input type="number" id="populationStart" min="1" placeholder="Enter population">
+  </div>
+
+  <div class="field">
+   <label>Population at end year (2024)</label>
+   <input type="number" id="populationEnd" min="1" placeholder="Enter population">
+  </div>
+
+  <p class="small">
+   Use population totals for the same selected area and comparison years. Do not substitute a single-date population-density raster for historical population counts.
+  </p>
+ </div>
+
+ <div class="section">
+  <h2>04 · Export results</h2>
+  <div class="mapbuttons">
+   <button id="exportCSV">Export CSV</button>
+   <button id="exportJSON">Export JSON</button>
+  </div>
+ </div>
+
+</aside>
+
+<!-- MAP -->
+<section class="panel">
+ <div class="maphead">
+  <div>
+   <h2>Interactive land-use map</h2>
+   <p>The Gambia · Raster-based spatial intelligence</p>
+  </div>
+  <span class="small" id="mapStatus">No raster loaded</span>
+ </div>
+
+ <div id="map"></div>
+
+ <div class="mapbuttons">
+  <button id="zoomGambia">Zoom to The Gambia</button>
+  <button id="toggleBoundary">Toggle boundaries</button>
+  <button id="changeOpacity">Change opacity</button>
+ </div>
+
+ <div class="legend">
+  <span><i class="swatch" style="background:#4c956c"></i>Class 1</span>
+  <span><i class="swatch" style="background:#e9c46a"></i>Class 2</span>
+  <span><i class="swatch" style="background:#d95f59"></i>Class 3</span>
+  <span><i class="swatch" style="background:#2878b5"></i>Class 4</span>
+  <span><i class="swatch" style="background:#8e6bbf"></i>Class 5</span>
+  <span><i class="swatch" style="background:#79b7a4"></i>Class 6</span>
+  <span><i class="swatch" style="background:#b58b58"></i>Class 7</span>
+  <span><i class="swatch" style="background:#d9d9d9"></i>No data</span>
+ </div>
+</section>
+
+<!-- RIGHT PANEL -->
+<aside class="panel right">
+
+ <div class="section">
+  <h2>05 · SDG 11.3.1 performance</h2>
+
+  <div class="kpis">
+   <div class="kpi">
+    <span>Built-up area 2003</span>
+    <strong id="area2003">—</strong>
+    <small>km²</small>
+   </div>
+
+   <div class="kpi">
+    <span>Built-up area 2024</span>
+    <strong id="area2024">—</strong>
+    <small>km²</small>
+   </div>
+
+   <div class="kpi">
+    <span>Land consumption rate</span>
+    <strong id="lcr">—</strong>
+    <small>% per year</small>
+   </div>
+
+   <div class="kpi">
+    <span>Population growth rate</span>
+    <strong id="pgr">—</strong>
+    <small>% per year</small>
+   </div>
+
+   <div class="kpi">
+    <span>SDG 11.3.1 ratio</span>
+    <strong id="sdgRatio">—</strong>
+    <small>LCR / PGR</small>
+   </div>
+
+   <div class="kpi">
+    <span>Built-up area change</span>
+    <strong id="areaChange">—</strong>
+    <small>km²</small>
+   </div>
+  </div>
+
+  <div id="interpretation" class="status" style="margin-top:9px">
+   Load the LULC rasters and run the analysis.
+  </div>
+ </div>
+
+ <div class="section">
+  <h2>06 · Built-up expansion over time</h2>
+  <div class="chartbox"><canvas id="builtChart"></canvas></div>
+ </div>
+
+ <div class="section">
+  <h2>07 · LULC class distribution – 2024</h2>
+  <div class="chartbox"><canvas id="classChart"></canvas></div>
+ </div>
+
+ <div class="section">
+  <h2>08 · Analysis summary</h2>
+  <table>
+   <thead><tr><th>Indicator</th><th>Result</th></tr></thead>
+   <tbody id="summaryTable">
+    <tr><td colspan="2">No analysis yet</td></tr>
+   </tbody>
+  </table>
+ </div>
+
+ <div class="section">
+  <h2>09 · Detected LULC classes</h2>
+  <div id="classValues" class="small">Load a LULC raster to inspect its values.</div>
+ </div>
+
+ <div class="section">
+  <h2>10 · SDG 11.3.1 methodology</h2>
+  <p><b>Land consumption rate (LCR)</b></p>
+  <p>LCR = ln(Urb / Ura) / y × 100</p>
+  <br>
+  <p><b>Population growth rate (PGR)</b></p>
+  <p>PGR = ln(Prb / Pra) / y × 100</p>
+  <br>
+  <p><b>SDG 11.3.1</b></p>
+  <p>Ratio = LCR / PGR</p>
+  <br>
+  <p>
+   A ratio above 1 indicates that land consumption is increasing faster than population. A ratio below 1 indicates that population is increasing faster than land consumption.
+  </p>
+  <br>
+  <p>
+   These calculations must use comparable geographical boundaries, dates and population definitions. A national estimate should not automatically be reported as a city-level official SDG estimate.
+  </p>
+ </div>
+
+</aside>
+</main>
+
+<footer>
+ <span>GBoS GEOAI · SDG 11 – Sustainable Cities and Communities</span>
+ <span>Produced by Ansu Singhateh | GIS Analyst | GIS / Cartography Unit | Gambia Bureau of Statistics</span>
+ <span>Research and educational use</span>
+</footer>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/georaster/dist/georaster.browser.min.js"></script>
+<script src="https://unpkg.com/georaster-layer-for-leaflet/dist/georaster-layer-for-leaflet.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+
+<script>
+/* ==========================================================
+   GBoS GEOAI – SDG 11 LAND-USE EFFICIENCY
+   Repository: silkysingz94-oss/SDG_11
+   ========================================================== */
+
+const REPOSITORY =
+ "https://raw.githubusercontent.com/silkysingz94-oss/SDG_11/main/";
+
+const FILES = {
+ "2003":"Gambia_LULC_2003.tif",
+ "2013":"Gambia_LULC_2013.tif",
+ "2024":"Gambia_LULC_2024.tif",
+ "population":"GBoS_EA_Population_Density.tif"
+};
+
+const COLORS = [
+ "#d9d9d9","#4c956c","#e9c46a","#d95f59",
+ "#2878b5","#8e6bbf","#79b7a4","#b58b58",
+ "#f28e2b","#5b6573","#b8c65a","#cf83a5"
+];
+
+const rasters = {};
+const rasterLayers = {};
+const charts = {};
+
+let boundaryLayer = null;
+let boundaryFeatures = [];
+let selectedFeature = null;
+let boundaryVisible = true;
+let rasterOpacity = 0.78;
+let lastSummary = null;
+
+/* MAP */
+const map = L.map("map",{
+ preferCanvas:true,
+ zoomControl:true
+}).setView([13.45,-15.45],8);
+
+const street = L.tileLayer(
+ "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+ {attribution:"© OpenStreetMap"}
+).addTo(map);
+
+const satellite = L.tileLayer(
+ "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+ {attribution:"Tiles © Esri"}
+);
+
+L.control.layers({
+ "Street":street,
+ "Satellite":satellite
+},null,{collapsed:true}).addTo(map);
+
+const $ = id => document.getElementById(id);
+
+function setStatus(message){
+ $("dataStatus").textContent = message;
+}
+
+function formatNumber(value,digits=2){
+ if(!Number.isFinite(value)) return "—";
+ return value.toLocaleString("en-US",{
+  minimumFractionDigits:digits,
+  maximumFractionDigits:digits
+ });
+}
+
+function setMapStatus(message){
+ $("mapStatus").textContent = message;
+}
+
+/* RASTER LOADING */
+async function readRaster(key,arrayBuffer,label){
+ if(typeof parseGeoraster !== "function"){
+  throw new Error("GeoTIFF reader failed to load. Check internet access.");
+ }
+
+ setStatus("Reading "+label+" ...");
+
+ const georaster = await parseGeoraster(arrayBuffer);
+
+ rasters[key] = georaster;
+
+ if(rasterLayers[key]){
+  map.removeLayer(rasterLayers[key]);
+ }
+
+ rasterLayers[key] = createRasterLayer(georaster,key);
+
+ if(key === $("mapLayer").value){
+  rasterLayers[key].addTo(map);
+ }
+
+ if(key === "2024" || !rasters["2024"]){
+  map.fitBounds([
+   [georaster.ymin,georaster.xmin],
+   [georaster.ymax,georaster.xmax]
+  ]);
+ }
+
+ setMapStatus(label+" loaded");
+
+ setStatus(
+  label+" loaded successfully.\n"+
+  "Raster size: "+georaster.width+" × "+georaster.height+
+  "\nProjection: "+georaster.projection
+ );
+
+ if(key==="2024") inspectClasses(georaster);
+}
+
+function createRasterLayer(georaster,key){
+ return new GeoRasterLayer({
+  georaster:georaster,
+  opacity:rasterOpacity,
+  resolution:256,
+
+  pixelValuesToColorFn:function(values){
+   const value = values && values[0];
+
+   if(value===null || value===undefined ||
+      !Number.isFinite(Number(value))){
+    return null;
+   }
+
+   if(key==="population"){
+    const n = Number(value);
+    if(n<=0)return "#f2f2f2";
+    if(n<50)return "#fff2b2";
+    if(n<150)return "#f6b45d";
+    if(n<500)return "#e56b4f";
+    return "#8d2f5d";
+   }
+
+   const code = Math.round(Number(value));
+   return COLORS[((code%COLORS.length)+COLORS.length)%COLORS.length];
+  }
+ });
+}
+
+async function loadFromURL(key){
+ const filename = FILES[key];
+ const url = REPOSITORY+filename;
+
+ setStatus("Downloading "+filename+" ...");
+
+ const response = await fetch(url);
+
+ if(!response.ok){
+  throw new Error("Unable to retrieve "+filename+
+   " (HTTP "+response.status+").");
+ }
+
+ const buffer = await response.arrayBuffer();
+ await readRaster(key,buffer,filename);
+}
+
+$("loadRepository").addEventListener("click",async function(){
+ this.disabled = true;
+
+ try{
+  for(const key of ["2003","2013","2024","population"]){
+   await loadFromURL(key);
+  }
+
+  setStatus(
+   "All four repository datasets loaded. Verify the built-up class code and enter population totals before calculating SDG 11.3.1."
+  );
+ }catch(error){
+  setStatus(
+   "Repository loading failed: "+error.message+
+   "\nYou can upload the GeoTIFF files individually."
+  );
+ }finally{
+  this.disabled = false;
+ }
+});
+
+/* LOCAL GEO-TIFF UPLOAD */
+const uploadMap = {
+ "file2003":"2003",
+ "file2013":"2013",
+ "file2024":"2024",
+ "filePopulation":"population"
+};
+
+Object.entries(uploadMap).forEach(([inputId,key])=>{
+ $(inputId).addEventListener("change",async function(event){
+  const file = event.target.files[0];
+  if(!file)return;
+
+  try{
+   await readRaster(key,await file.arrayBuffer(),file.name);
+  }catch(error){
+   setStatus("Raster error: "+error.message);
+  }
+ });
+});
+
+/* MAP LAYER SELECTION */
+$("mapLayer").addEventListener("change",function(){
+ Object.values(rasterLayers).forEach(layer=>{
+  if(map.hasLayer(layer))map.removeLayer(layer);
+ });
+
+ const key=this.value;
+
+ if(key==="change"){
+  setMapStatus("Built-up change summary is available after running analysis.");
+  return;
+ }
+
+ if(rasterLayers[key]){
+  rasterLayers[key].addTo(map);
+  setMapStatus(key+" raster displayed");
+ }else{
+  setMapStatus("The selected raster has not been loaded.");
+ }
+});
+
+/* RASTER OPACITY */
+$("changeOpacity").onclick=function(){
+ rasterOpacity =
+  rasterOpacity===0.78 ? 0.4 :
+  rasterOpacity===0.4 ? 1 : 0.78;
+
+ Object.values(rasterLayers).forEach(layer=>{
+  layer.setOpacity(rasterOpacity);
+ });
+};
+
+/* ZOOM */
+$("zoomGambia").onclick=function(){
+ const g=rasters["2024"]||rasters["2013"]||rasters["2003"];
+
+ if(g){
+  map.fitBounds([[g.ymin,g.xmin],[g.ymax,g.xmax]]);
+ }else{
+  map.setView([13.45,-15.45],8);
+ }
+};
+
+/* ADMINISTRATIVE GEOJSON */
+$("boundaryFile").addEventListener("change",async function(event){
+ const file=event.target.files[0];
+ if(!file)return;
+
+ try{
+  const geojson=JSON.parse(await file.text());
+
+  boundaryFeatures =
+   geojson.type==="FeatureCollection" ?
+   geojson.features : [geojson];
+
+  if(boundaryLayer)map.removeLayer(boundaryLayer);
+
+  boundaryLayer=L.geoJSON(geojson,{
+   style:{
+    color:"#252525",
+    weight:1.2,
+    fillOpacity:0.02
+   }
+  }).addTo(map);
+
+  boundaryVisible=true;
+
+  populateAreaSelector();
+
+  map.fitBounds(boundaryLayer.getBounds());
+
+  setMapStatus(
+   "Administrative boundaries loaded: "+
+   boundaryFeatures.length+" features"
+  );
+
+ }catch(error){
+  alert("Unable to read GeoJSON: "+error.message);
+ }
+});
+
+function getFeatureName(feature,index){
+ const p=feature.properties||{};
+
+ const keys=[
+  "shapeName","NAME_1","NAME_2","NAME_3",
+  "name","NAME","lganame","distname","wardname",
+  "ADM1_EN","ADM2_EN","ADM3_EN"
+ ];
+
+ for(const key of keys){
+  if(p[key]!==undefined && p[key]!==null && String(p[key]).trim()){
+   return String(p[key]);
+  }
+ }
+
+ return "Area "+(index+1);
+}
+
+function populateAreaSelector(){
+ const level=$("adminLevel").value;
+ const select=$("selectedArea");
+
+ select.innerHTML='<option value="all">National – All The Gambia</option>';
+
+ boundaryFeatures.forEach((feature,index)=>{
+  const option=document.createElement("option");
+  option.value=String(index);
+  option.textContent=getFeatureName(feature,index);
+  select.appendChild(option);
+ });
+}
+
+$("adminLevel").addEventListener("change",populateAreaSelector);
+
+$("selectedArea").addEventListener("change",function(){
+ selectedFeature=null;
+
+ if(this.value!=="all"){
+  selectedFeature=boundaryFeatures[Number(this.value)]||null;
+
+  if(selectedFeature){
+   const layer=L.geoJSON(selectedFeature);
+   map.fitBounds(layer.getBounds());
+  }
+ }else{
+  $("zoomGambia").click();
+ }
+});
+
+$("toggleBoundary").onclick=function(){
+ if(!boundaryLayer)return;
+
+ if(boundaryVisible){
+  map.removeLayer(boundaryLayer);
+  boundaryVisible=false;
+ }else{
+  boundaryLayer.addTo(map);
+  boundaryVisible=true;
+ }
+};
+
+/* PIXEL AREA CALCULATION */
+function pixelAreaKm2(georaster,rowIndex){
+ const dx=Math.abs(georaster.pixelWidth);
+ const dy=Math.abs(georaster.pixelHeight);
+
+ const projection=Number(georaster.projection);
+
+ if(projection===4326){
+  const latitude=
+   georaster.ymax-(rowIndex+0.5)*dy;
+
+  const latitudeKm=111.32*dy;
+  const longitudeKm=
+   111.32*Math.cos(latitude*Math.PI/180)*dx;
+
+  return latitudeKm*longitudeKm;
+ }
+
+ // Projected rasters: assumes pixel dimensions are in metres.
+ // Verify the CRS units before using these area estimates.
+ return (dx*dy)/1000000;
+}
+
+/* POINT IN POLYGON */
+function pointInRing(lon,lat,ring){
+ let inside=false;
+
+ for(let i=0,j=ring.length-1;i<ring.length;j=i++){
+  const xi=ring[i][0],yi=ring[i][1];
+  const xj=ring[j][0],yj=ring[j][1];
+
+  const intersect=
+   ((yi>lat)!==(yj>lat)) &&
+   (lon<(xj-xi)*(lat-yi)/(yj-yi+1e-30)+xi);
+
+  if(intersect)inside=!inside;
+ }
+
+ return inside;
+}
+
+function pointInPolygonGeometry(lon,lat,geometry){
+ if(!geometry)return true;
+
+ function polygonContains(polygon){
+  if(!pointInRing(lon,lat,polygon[0]))return false;
+
+  for(let i=1;i<polygon.length;i++){
+   if(pointInRing(lon,lat,polygon[i]))return false;
+  }
+
+  return true;
+ }
+
+ if(geometry.type==="Polygon"){
+  return polygonContains(geometry.coordinates);
+ }
+
+ if(geometry.type==="MultiPolygon"){
+  return geometry.coordinates.some(polygonContains);
+ }
+
+ return true;
+}
+
+/* RASTER AREA AND CLASS STATISTICS */
+function calculateRasterStatistics(georaster,builtClass,feature){
+ const values=georaster.values[0];
+
+ let totalArea=0;
+ let builtArea=0;
+ const classCounts={};
+
+ for(let y=0;y<georaster.height;y++){
+  const row=values[y];
+  if(!row)continue;
+
+  const pixelArea=pixelAreaKm2(georaster,y);
+
+  for(let x=0;x<georaster.width;x++){
+   const raw=row[x];
+
+   if(raw===null || raw===undefined ||
+      !Number.isFinite(Number(raw)))continue;
+
+   if(feature){
+    const lon=georaster.xmin+(x+0.5)*georaster.pixelWidth;
+    const lat=georaster.ymax-(y+0.5)*georaster.pixelHeight;
+
+    if(!pointInPolygonGeometry(lon,lat,feature.geometry)){
+     continue;
+    }
+   }
+
+   const value=Math.round(Number(raw));
+   const key=String(value);
+
+   classCounts[key]=(classCounts[key]||0)+1;
+   totalArea+=pixelArea;
+
+   if(value===Number(builtClass)){
+    builtArea+=pixelArea;
+   }
+  }
+ }
+
+ return {
+  totalArea:totalArea,
+  builtArea:builtArea,
+  classCounts:classCounts
+ };
+}
+
+/* CLASS INSPECTION */
+function inspectClasses(georaster){
+ const counts={};
+ const values=georaster.values[0];
+
+ for(let y=0;y<georaster.height;y++){
+  const row=values[y];
+  if(!row)continue;
+
+  for(let x=0;x<georaster.width;x++){
+   const v=row[x];
+
+   if(v===null || v===undefined ||
+      !Number.isFinite(Number(v)))continue;
+
+   const code=String(Math.round(Number(v)));
+   counts[code]=(counts[code]||0)+1;
+  }
+ }
+
+ $("classValues").innerHTML=
+  Object.entries(counts)
+   .sort((a,b)=>Number(a[0])-Number(b[0]))
+   .map(([code,count])=>
+    '<span class="badge">Class '+code+': '+
+    count.toLocaleString()+' pixels</span>'
+   ).join("");
+}
+
+/* SDG RATE CALCULATION */
+function calculateRates(areaStart,areaEnd,popStart,popEnd,years){
+ let lcr=NaN;
+ let pgr=NaN;
+ let ratio=NaN;
+
+ if(areaStart>0 && areaEnd>0){
+  lcr=Math.log(areaEnd/areaStart)/years*100;
+ }
+
+ if(popStart>0 && popEnd>0){
+  pgr=Math.log(popEnd/popStart)/years*100;
+ }
+
+ if(Number.isFinite(lcr) &&
+    Number.isFinite(pgr) &&
+    Math.abs(pgr)>0.000000001){
+  ratio=lcr/pgr;
+ }
+
+ return {lcr,pgr,ratio};
+}
+
+/* CHARTS */
+function createChart(id,type,data){
+ if(charts[id])charts[id].destroy();
+
+ charts[id]=new Chart($(id),{
+  type:type,
+  data:data,
+  options:{
+   responsive:true,
+   maintainAspectRatio:false,
+   plugins:{
+    legend:{display:false}
+   },
+   scales:{
+    x:{
+     grid:{display:false},
+     ticks:{font:{size:9}}
+    },
+    y:{
+     beginAtZero:true,
+     grid:{color:"#eef0f4"},
+     ticks:{font:{size:9}}
+    }
+   }
+  }
+ });
+}
+
+/* ANALYSIS */
+function runAnalysis(){
+ const required=["2003","2013","2024"];
+
+ const missing=required.filter(key=>!rasters[key]);
+
+ if(missing.length){
+  setStatus("Missing LULC rasters: "+missing.join(", "));
+  return;
+ }
+
+ const builtClass=Number($("builtClass").value);
+ const years=2024-2003;
+
+ const s2003=calculateRasterStatistics(
+  rasters["2003"],builtClass,selectedFeature
+ );
+
+ const s2013=calculateRasterStatistics(
+  rasters["2013"],builtClass,selectedFeature
+ );
+
+ const s2024=calculateRasterStatistics(
+  rasters["2024"],builtClass,selectedFeature
+ );
+
+ const popStart=Number($("populationStart").value);
+ const popEnd=Number($("populationEnd").value);
+
+ const rates=calculateRates(
+  s2003.builtArea,
+  s2024.builtArea,
+  popStart,
+  popEnd,
+  years
+ );
+
+ const areaName=
+  $("selectedArea").selectedOptions[0].textContent;
+
+ $("area2003").textContent=formatNumber(s2003.builtArea);
+ $("area2024").textContent=formatNumber(s2024.builtArea);
+ $("lcr").textContent=formatNumber(rates.lcr,3);
+ $("pgr").textContent=formatNumber(rates.pgr,3);
+ $("sdgRatio").textContent=formatNumber(rates.ratio,3);
+ $("areaChange").textContent=
+  formatNumber(s2024.builtArea-s2003.builtArea);
+
+ let interpretation;
+
+ if(!Number.isFinite(rates.ratio)){
+  interpretation=
+   "Built-up area has been calculated. Enter comparable positive population totals for 2003 and 2024 to calculate the SDG 11.3.1 ratio. A single population-density raster cannot establish historical population growth.";
+ }else if(rates.ratio>1){
+  interpretation=
+   "The ratio is above 1. Land consumption is increasing faster than population growth over the comparison period.";
+ }else if(rates.ratio<1){
+  interpretation=
+   "The ratio is below 1. Population growth is faster than land consumption over the comparison period.";
+ }else{
+  interpretation=
+   "The ratio is approximately 1. Land consumption and population growth are occurring at similar rates.";
+ }
+
+ $("interpretation").textContent=interpretation;
+
+ const rows=[
+  ["Selected area",areaName],
+  ["Period","2003–2024"],
+  ["Duration",years+" years"],
+  ["Built-up class","Class "+builtClass],
+  ["Built-up area 2003",formatNumber(s2003.builtArea)+" km²"],
+  ["Built-up area 2013",formatNumber(s2013.builtArea)+" km²"],
+  ["Built-up area 2024",formatNumber(s2024.builtArea)+" km²"],
+  ["Built-up change",formatNumber(s2024.builtArea-s2003.builtArea)+" km²"],
+  ["Total mapped area 2024",formatNumber(s2024.totalArea)+" km²"],
+  ["Population 2003",popStart>0?popStart.toLocaleString():"Not supplied"],
+  ["Population 2024",popEnd>0?popEnd.toLocaleString():"Not supplied"],
+  ["LCR",formatNumber(rates.lcr,4)+"% per year"],
+  ["PGR",formatNumber(rates.pgr,4)+"% per year"],
+  ["SDG 11.3.1",formatNumber(rates.ratio,4)]
+ ];
+
+ $("summaryTable").innerHTML=rows.map(row=>
+  "<tr><td>"+row[0]+"</td><td><b>"+row[1]+"</b></td></tr>"
+ ).join("");
+
+ createChart("builtChart","line",{
+  labels:["2003","2013","2024"],
+  datasets:[{
+   label:"Built-up area (km²)",
+   data:[
+    s2003.builtArea,
+    s2013.builtArea,
+    s2024.builtArea
+   ],
+   borderColor:"#6049e8",
+   backgroundColor:"rgba(96,73,232,.15)",
+   fill:true,
+   tension:.3
+  }]
+ });
+
+ const classEntries=Object.entries(s2024.classCounts)
+  .sort((a,b)=>Number(a[0])-Number(b[0]));
+
+ createChart("classChart","bar",{
+  labels:classEntries.map(item=>"Class "+item[0]),
+  datasets:[{
+   label:"Pixel count",
+   data:classEntries.map(item=>item[1]),
+   backgroundColor:classEntries.map(item=>
+    COLORS[((Number(item[0])%COLORS.length)+COLORS.length)%COLORS.length]
+   )
+  }]
+ });
+
+ lastSummary={
+  country:"The Gambia",
+  selected_area:areaName,
+  start_year:2003,
+  middle_year:2013,
+  end_year:2024,
+  duration_years:years,
+  built_up_class_code:builtClass,
+  built_up_area_2003_km2:s2003.builtArea,
+  built_up_area_2013_km2:s2013.builtArea,
+  built_up_area_2024_km2:s2024.builtArea,
+  built_up_change_km2:s2024.builtArea-s2003.builtArea,
+  mapped_area_2024_km2:s2024.totalArea,
+  population_2003:popStart||null,
+  population_2024:popEnd||null,
+  land_consumption_rate_percent_per_year:rates.lcr,
+  population_growth_rate_percent_per_year:rates.pgr,
+  sdg_11_3_1_ratio:rates.ratio,
+  note:"Check raster alignment, projection, no-data values, built-up class definition and population comparability before official reporting."
+ };
+
+ setStatus(
+  "Analysis completed for "+areaName+
+  ". Verify raster projection, pixel area units, alignment and the built-up class definition before reporting."
+ );
+}
+
+/* RUN BUTTON */
+$("runAnalysis").addEventListener("click",function(){
+ try{
+  runAnalysis();
+ }catch(error){
+  setStatus("Analysis error: "+error.message);
+ }
+});
+
+/* EXPORTS */
+function downloadFile(filename,content,mime){
+ const blob=new Blob([content],{type:mime});
+ const url=URL.createObjectURL(blob);
+ const a=document.createElement("a");
+ a.href=url;
+ a.download=filename;
+ a.click();
+ URL.revokeObjectURL(url);
+}
+
+$("exportCSV").onclick=function(){
+ if(!lastSummary){
+  alert("Run the analysis first.");
+  return;
+ }
+
+ const keys=Object.keys(lastSummary);
+ const values=keys.map(key=>{
+  const value=lastSummary[key];
+  return '"'+String(value??"").replace(/"/g,'""')+'"';
+ });
+
+ downloadFile(
+  "Gambia_SDG11_Land_Use_Efficiency.csv",
+  keys.join(",")+"\n"+values.join(","),
+  "text/csv"
+ );
+};
+
+$("exportJSON").onclick=function(){
+ if(!lastSummary){
+  alert("Run the analysis first.");
+  return;
+ }
+
+ downloadFile(
+  "Gambia_SDG11_Land_Use_Efficiency.json",
+  JSON.stringify(lastSummary,null,2),
+  "application/json"
+ );
+};
+
+/* RESET */
+$("reset").onclick=function(){
+ location.reload();
+};
+</script>
+
+</body>
+</html>
