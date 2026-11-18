@@ -1,4 +1,4 @@
-Shape *,lganame,RCO,distname,wardname,eaname,Shape_Leng,GIS_STAFF,EA_code,map_hhs_23,map_pop_23,ls_hhs_23,ls_pop_23,Census_hhs_23,Census_pop_23,Comp_map_23,Build_map_23,Comp_ls_23,Build_ls_23,OBJECTID_1,Area_sqkm,Shape_Le_1,Shape_Length,Shape_Area,Census_pop_23,Census_hhs_13,Comp_map_13
+Shape *,lganame,RCO,distname,wardname,eaname,Shape_Leng,GIS_STAFF,EA_code,map_hhs_23,map_pop_23,ls_hhs_23,ls_pop_23,Census_hhs_23,Census_pop_23,Comp_map_23,Build_map_23,Comp_ls_23,Build_ls_23,OBJECTID_1,Area_sqkm,Shape_Le_1,Shape_Length,Shape_Area,Census_pop_13,Census_hhs_13,Comp_map_13
 Polygon,Banjul,BANJUL,Banjul South,Half Die,Gamfood EA,1161.074713,Dembo,1011001,153,706,147,592,145,606,57,133,57,138,1,0.045957,1161.074713,1161.074713,48877.71744,731,189,51
 Polygon,Banjul,BANJUL,Banjul South,Half Die,Immigration EA,1114.010271,Dembo,1011002,122,503,83,337,81,409,70,78,74,147,2,0.058715,1114.010271,1114.010271,62446.21477,498,136,90
 Polygon,Banjul,BANJUL,Banjul South,Half Die,Terminal EA,3634.54063,Dembo,1011003,139,637,73,409,73,412,81,84,83,158,3,0.23558,3634.54063,3634.54063,250541.545,531,130,174
